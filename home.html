@@ -3,41 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Auction Items</title>
-
-    <!-- Firebase SDKs in compatibility mode (non-modular) -->
+    <title>Auction Homepage</title>
+    <!-- Firebase SDKs (adjust version if necessary) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
-
+    <script src="form.js" defer></script> <!-- Link to your JS file -->
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            line-height: 1.6;
-        }
-        .auction-item {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 10px;
-            background-color: #f9f9f9;
-        }
-        img {
-            max-width: 150px;
-        }
+        body { font-family: Arial, sans-serif; }
+        .auction-item { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
     <h2>All Auction Items</h2>
-
-    <!-- Container to display all auction items -->
-    <div id="allAuctionItems">
-        <!-- Auction items will be displayed here -->
-    </div>
+    <div id="allAuctionItems"></div>
 
     <script>
-        // Firebase configuration (replace with your actual Firebase project settings)
-     // Your web app's Firebase configuration
+        // Firebase configuration and initialization
+        // Your web app's Firebase configuration
         const firebaseConfig = {
         apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
         authDomain: "onlineauction-ba60b.firebaseapp.com",
@@ -46,92 +29,43 @@
         storageBucket: "onlineauction-ba60b.appspot.com",
         messagingSenderId: "313811380253",
         appId: "1:313811380253:web:e80553266413d869dafef4"
-         };
+        };
 
-        // Initialize Firebase using the global `firebase` object provided by the Firebase SDK scripts
-        try {
-            firebase.initializeApp(firebaseConfig);
-            console.log("Firebase initialized successfully");
-        } catch (error) {
-            console.error("Firebase initialization error:", error);
-        }
-
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Wait for Firebase to confirm the authentication status of the user
-        document.addEventListener('DOMContentLoaded', () => {
-            firebase.auth().onAuthStateChanged((user) => {
-                if (user) {
-                    console.log("User is authenticated:", user.uid);
-                    fetchAllAuctionItems(); // Fetch auction items only after confirming the user is authenticated
-                } else {
-                    console.log("User is not authenticated. Redirecting to login...");
-                    alert("You must be logged in to view this page.");
-                    window.location.href = 'login.html'; // Redirect to login if not authenticated
-                }
-            });
-        });
-
-        // Function to fetch and display all auction items uploaded by all users
+        // Fetch and display all auction items
         async function fetchAllAuctionItems() {
-            try {
-                console.log("Fetching all auction items from all users...");
+            const usersRef = db.ref('onlineAuction/users');
+            usersRef.on('value', (snapshot) => {
+                const allAuctionItemsContainer = document.getElementById('allAuctionItems');
+                allAuctionItemsContainer.innerHTML = ''; // Clear existing items
 
-                // Reference to the "onlineAuction/users" node in Firebase Realtime Database
-                const usersRef = db.ref('onlineAuction/users');
-
-                // Fetch all users and their auction items
-                usersRef.on('value', (snapshot) => {
-                    const allAuctionItemsContainer = document.getElementById('allAuctionItems');
-                    allAuctionItemsContainer.innerHTML = ''; // Clear existing items
-
-                    if (snapshot.exists()) {
-                        console.log("Data snapshot exists. Processing users...");
-
-                        snapshot.forEach((userSnapshot) => {
-                            const userUID = userSnapshot.key; // The user's unique ID
-                            const userUsername = userSnapshot.child('username').val(); // Get the user's username
-                            const userEmail = userSnapshot.child('email').val(); // Get the user's email
-                            const userItemsRef = userSnapshot.child('auction-items');
-
-                            if (userItemsRef.exists()) {
-                                console.log("Found auction items for user:", userUID);
-
-                                userItemsRef.forEach((itemSnapshot) => {
-                                    const itemData = itemSnapshot.val();
-                                    console.log("Item fetched:", itemData);
-
-                                    // Create an element for each auction item and append it to the container
-                                    const itemElement = document.createElement('div');
-                                    itemElement.classList.add('auction-item');
-                                    itemElement.innerHTML = `
-                                        <h3>Item Name: ${itemData.name}</h3>
-                                        <p>Description: ${itemData.description}</p>
-                                        <p>Price: $${itemData.price}</p>
-                                        <img src="${itemData.imageUrl}" alt="${itemData.name}" />
-                                        <p>Uploaded by: ${userUsername}</p>
-                                        <p>Contact: ${userEmail}</p>
-                                        <hr>
-                                    `;
-                                    allAuctionItemsContainer.appendChild(itemElement);
-                                });
-                            } else {
-                                console.log(`No auction items found for user: ${userUID}`);
-                            }
-                        });
-                    } else {
-                        console.log("No data found at path: 'onlineAuction/users'");
-                        allAuctionItemsContainer.innerHTML = `<p>No items uploaded yet.</p>`;
-                    }
-                }, (error) => {
-                    console.error("Error fetching data from database:", error);
-                    alert("An error occurred while fetching auction items. Please check the console for more details.");
+                snapshot.forEach((userSnapshot) => {
+                    userSnapshot.child('auction-items').forEach((itemSnapshot) => {
+                        const itemData = itemSnapshot.val();
+                        const itemElement = document.createElement('div');
+                        itemElement.classList.add('auction-item');
+                        itemElement.innerHTML = `
+                            <h3>${itemData.name}</h3>
+                            <p>Description: ${itemData.description}</p>
+                            <p>Starting Price: $${itemData.price}</p>
+                            <p>Current Highest Bid: $${itemData.highestBid || itemData.price}</p>
+                            <p>Highest Bidder: ${itemData.highestBidder ? itemData.highestBidder : 'No bids yet'}</p>
+                            <form onsubmit="placeBid(event, '${userSnapshot.key}', '${itemSnapshot.key}', ${itemData.highestBid || itemData.price})">
+                                <input type="number" id="bidAmount-${itemSnapshot.key}" placeholder="Enter bid amount" min="${itemData.highestBid || itemData.price + 1}" required>
+                                <button type="submit">Place Bid</button>
+                            </form>
+                            <hr>
+                        `;
+                        allAuctionItemsContainer.appendChild(itemElement);
+                    });
                 });
-            } catch (error) {
-                console.error("Unexpected error fetching auction items:", error.message);
-                alert("Could not fetch auction items. Please reload the page.");
-            }
+            });
         }
+
+        // Load all auction items on page load
+        fetchAllAuctionItems();
     </script>
 </body>
 </html>

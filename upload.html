@@ -28,9 +28,6 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        .button-container button:hover {
-            background-color: #45a049;
-        }
         #progressContainer {
             display: none;
             margin-top: 10px;
@@ -50,7 +47,6 @@
     </style>
 </head>
 <body>
-    <!-- Button to navigate to the homepage, positioned at the top -->
     <div class="button-container">
         <button onclick="window.location.href='home.html'">Go to Homepage</button>
     </div>
@@ -69,14 +65,12 @@
         <label for="image">Item Image:</label>
         <input type="file" id="image" accept="image/*" required><br>
 
-        <!-- Auction End Date and Time -->
         <label for="endTime">Auction End Time:</label>
         <input type="datetime-local" id="endTime" required><br>
 
         <button type="submit">Upload Item</button>
     </form>
 
-    <!-- Progress bar for upload -->
     <div id="progressContainer">
         <p>Uploading: <span id="progressText">0%</span></p>
         <div id="progressBar">
@@ -85,7 +79,7 @@
     </div>
 
     <script>
-    // Your web app's Firebase configuration
+        // Your web app's Firebase configuration
         const firebaseConfig = {
         apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
         authDomain: "onlineauction-ba60b.firebaseapp.com",
@@ -97,62 +91,40 @@
         };
 
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
 
-        // Redirect to login if user is not authenticated
         firebase.auth().onAuthStateChanged((user) => {
             if (!user) {
                 alert("You must be logged in to upload items.");
-                window.location.href = "index.html"; // Redirect to login page
+                window.location.href = "index.html";
             }
         });
 
-        // Upload item to Firebase with progress tracking
         async function uploadItem(event) {
             event.preventDefault();
-            
-            console.log("Starting upload process...");
 
             const itemName = document.getElementById("itemName").value;
             const description = document.getElementById("description").value;
             const price = parseFloat(document.getElementById("price").value);
-            const endTime = new Date(document.getElementById("endTime").value).getTime(); // Convert to timestamp
+            const endTime = new Date(document.getElementById("endTime").value).getTime();
             const imageFile = document.getElementById("image").files[0];
-
             const user = firebase.auth().currentUser;
-            if (!user) {
-                alert("You need to log in to upload items.");
-                console.log("User not logged in.");
-                return;
-            }
 
             try {
-                console.log("Uploading image to Firebase Storage...");
-                
                 const storageRef = firebase.storage().ref();
                 const imageRef = storageRef.child(`images/${imageFile.name}`);
 
-                // Show the progress container
                 document.getElementById("progressContainer").style.display = "block";
-
-                // Upload with progress tracking
                 const uploadTask = imageRef.put(imageFile);
+
                 uploadTask.on('state_changed', (snapshot) => {
-                    // Update progress
                     const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                     document.getElementById("progressText").innerText = `${Math.floor(progress)}%`;
                     document.getElementById("progressFill").style.width = `${progress}%`;
-                    console.log("Upload progress:", progress);
                 }, (error) => {
-                    console.error("Error during upload:", error.message);
-                    alert("An error occurred: " + error.message);
+                    alert("Error during upload: " + error.message);
                 }, async () => {
-                    // Get the download URL when upload is complete
                     const imageUrl = await uploadTask.snapshot.ref.getDownloadURL();
-                    console.log("Image uploaded successfully:", imageUrl);
-
-                    console.log("Saving item to Firebase Database...");
                     const itemRef = firebase.database().ref(`onlineAuction/users/${user.uid}/auction-items`).push();
                     await itemRef.set({
                         name: itemName,
@@ -165,14 +137,10 @@
                     });
 
                     alert("Item uploaded successfully!");
-                    console.log("Item saved successfully to database.");
-                    document.getElementById("uploadForm").reset();
-                    document.getElementById("progressContainer").style.display = "none"; // Hide the progress bar
+                    window.location.href = "home.html";
                 });
             } catch (error) {
-                console.error("Error during upload process:", error.message);
-                alert("An error occurred: " + error.message);
-                document.getElementById("progressContainer").style.display = "none"; // Hide the progress bar if error
+                alert("Error during upload: " + error.message);
             }
         }
     </script>

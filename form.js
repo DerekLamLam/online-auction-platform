@@ -9,7 +9,6 @@
     appId: "1:313811380253:web:e80553266413d869dafef4"
     };
 
-
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -24,19 +23,20 @@ async function fetchAllAuctionItems() {
         allAuctionItemsContainer.innerHTML = ''; // Clear existing items
 
         snapshot.forEach((userSnapshot) => {
-            const sellerData = userSnapshot.val(); // Fetch seller's data, including username and email
+            const sellerData = userSnapshot.val(); // Fetch seller's username and email
             userSnapshot.child('auction-items').forEach((itemSnapshot) => {
                 const itemData = itemSnapshot.val();
                 const itemID = itemSnapshot.key;
                 const userUID = userSnapshot.key;
 
-                // Set placeholder for highest bidder's name and load the name if there's a highestBidder
+                // Get highest bidder's username
                 let highestBidderName = "No bids yet";
                 if (itemData.highestBidder) {
-                    db.ref(`onlineAuction/users/${itemData.highestBidder}/username`).once('value').then((bidderSnapshot) => {
-                        highestBidderName = bidderSnapshot.val() || itemData.highestBidder;
-                        document.getElementById(`highestBidder-${itemID}`).innerText = highestBidderName;
-                    });
+                    db.ref(`onlineAuction/users/${itemData.highestBidder}/username`).once('value')
+                        .then((bidderSnapshot) => {
+                            highestBidderName = bidderSnapshot.val() || itemData.highestBidder;
+                            document.getElementById(`highestBidder-${itemID}`).innerText = highestBidderName;
+                        });
                 }
 
                 const itemElement = document.createElement('div');
@@ -61,12 +61,14 @@ async function fetchAllAuctionItems() {
     });
 }
 
-// Function to place a bid with error logging for debugging
+// Function to place a bid with error handling and debugging
 async function placeBid(event, userUID, itemID, currentHighestBid) {
     event.preventDefault();
 
     const bidInput = document.getElementById(`bidAmount-${itemID}`);
     const bidAmount = parseFloat(bidInput.value);
+
+    console.log("Attempting to place bid", { userUID, itemID, bidAmount, currentHighestBid });
 
     try {
         // Ensure the bid is higher than the current highest bid
@@ -75,16 +77,15 @@ async function placeBid(event, userUID, itemID, currentHighestBid) {
             return;
         }
 
-        // Get the currently authenticated user
         const user = auth.currentUser;
         if (!user) {
             alert("You need to log in to place a bid.");
             return;
         }
 
-        // Reference to the auction item in Firebase
+        // Reference to the specific auction item in Firebase
         const itemRef = db.ref(`onlineAuction/users/${userUID}/auction-items/${itemID}`);
-        
+
         // Update Firebase with the new highest bid and bidder
         await itemRef.update({
             highestBid: bidAmount,
@@ -94,7 +95,7 @@ async function placeBid(event, userUID, itemID, currentHighestBid) {
         alert("Bid placed successfully!");
         fetchAllAuctionItems(); // Refresh items to show updated bid
     } catch (error) {
-        console.error("Error placing bid:", error.message);
+        console.error("Error placing bid:", error);
         alert("An error occurred while placing your bid. Please try again.");
     }
 }

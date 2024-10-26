@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchAllAuctionItems();
         } else {
             alert("You must be logged in to view this page.");
-            window.location.href = 'login.html';
+            window.location.href = 'index.html';
         }
     });
 });
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             alert("You must be logged in to access this page.");
-            window.location.href = 'login.html';
+            window.location.href = 'index.html';
         }
     });
 });

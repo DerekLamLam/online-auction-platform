@@ -8,7 +8,6 @@
     messagingSenderId: "313811380253",
     appId: "1:313811380253:web:e80553266413d869dafef4"
     };
-
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -29,7 +28,8 @@ async function fetchAllAuctionItems() {
                 const itemID = itemSnapshot.key;
                 const userUID = userSnapshot.key;
 
-                // Get highest bidder's username
+                // Handle highestBid being null
+                const currentHighestBid = itemData.highestBid || itemData.price;
                 let highestBidderName = "No bids yet";
                 if (itemData.highestBidder) {
                     db.ref(`onlineAuction/users/${itemData.highestBidder}/username`).once('value')
@@ -45,12 +45,12 @@ async function fetchAllAuctionItems() {
                     <h3>${itemData.name}</h3>
                     <p>Description: ${itemData.description}</p>
                     <p>Starting Price: $${itemData.price}</p>
-                    <p>Current Highest Bid: $${itemData.highestBid || itemData.price}</p>
+                    <p>Current Highest Bid: $${currentHighestBid}</p>
                     <p>Highest Bidder: <span id="highestBidder-${itemID}">${highestBidderName}</span></p>
                     <p>Seller: ${sellerData.username || 'Unknown'} (${sellerData.email || 'No email provided'})</p>
                     <img src="${itemData.imageUrl || ''}" alt="${itemData.name}" style="max-width: 200px;">
-                    <form onsubmit="placeBid(event, '${userUID}', '${itemID}', ${itemData.highestBid || itemData.price})">
-                        <input type="number" id="bidAmount-${itemID}" placeholder="Enter bid amount" min="${itemData.highestBid ? itemData.highestBid + 1 : itemData.price + 1}" required>
+                    <form onsubmit="placeBid(event, '${userUID}', '${itemID}', ${currentHighestBid})">
+                        <input type="number" id="bidAmount-${itemID}" placeholder="Enter bid amount" min="${currentHighestBid + 1}" required>
                         <button type="submit">Place Bid</button>
                     </form>
                     <hr>

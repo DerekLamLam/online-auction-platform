@@ -1,5 +1,5 @@
-// Firebase configuration
-const firebaseConfig = {
+// Your web app's Firebase configuration
+    const firebaseConfig = {
     apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
     authDomain: "onlineauction-ba60b.firebaseapp.com",
     databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
@@ -8,153 +8,153 @@ const firebaseConfig = {
     messagingSenderId: "313811380253",
     appId: "1:313811380253:web:e80553266413d869dafef4"
     };
-// Initialize Firebase using the global `firebase` object provided by the Firebase SDK scripts
+
+
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 const storage = firebase.storage();
 
-console.log("Firebase initialized successfully");
-
-// Check if the user is logged in when the DOM is loaded
+// Function to check if the user is logged in and fetch auction items
 document.addEventListener('DOMContentLoaded', () => {
-    auth.onAuthStateChanged(user => {
+    auth.onAuthStateChanged((user) => {
         if (user) {
-            console.log("User is authenticated:", user.uid); // Log the authenticated user UID
-            displayAuctionItems(user.uid); // Display existing auction items for the user
-
-            // Handle auction item form submission
-            const formElement = document.getElementById('auctionForm');
-            if (formElement) {
-                formElement.addEventListener('submit', function (e) {
-                    e.preventDefault(); // Prevent default form submission
-                    console.log("Form submitted, starting upload process...");
-                    handleUpload(user); // Handle the upload process
-                });
-            }
+            fetchAllAuctionItems();
         } else {
-            console.log("User is not authenticated, redirecting to login...");
-            alert("You must be logged in to access this page.");
-            window.location.href = 'login.html'; // Redirect if the user is not authenticated
+            alert("You must be logged in to view this page.");
+            window.location.href = 'login.html';
         }
     });
 });
 
+// Function to fetch and display all auction items
+async function fetchAllAuctionItems() {
+    const usersRef = db.ref('onlineAuction/users');
+    usersRef.on('value', (snapshot) => {
+        const allAuctionItemsContainer = document.getElementById('allAuctionItems');
+        allAuctionItemsContainer.innerHTML = ''; // Clear existing items
+
+        snapshot.forEach((userSnapshot) => {
+            userSnapshot.child('auction-items').forEach((itemSnapshot) => {
+                const itemData = itemSnapshot.val();
+                const itemElement = document.createElement('div');
+                itemElement.classList.add('auction-item');
+                itemElement.innerHTML = `
+                    <h3>${itemData.name}</h3>
+                    <p>Description: ${itemData.description}</p>
+                    <p>Starting Price: $${itemData.price}</p>
+                    <p>Current Highest Bid: $${itemData.highestBid || itemData.price}</p>
+                    <p>Highest Bidder: ${itemData.highestBidder || 'No bids yet'}</p>
+                    <form onsubmit="placeBid(event, '${userSnapshot.key}', '${itemSnapshot.key}', ${itemData.highestBid || itemData.price})">
+                        <input type="number" id="bidAmount-${itemSnapshot.key}" placeholder="Enter bid amount" min="${itemData.highestBid ? itemData.highestBid + 1 : itemData.price + 1}" required>
+                        <button type="submit">Place Bid</button>
+                    </form>
+                    <hr>
+                `;
+                allAuctionItemsContainer.appendChild(itemElement);
+            });
+        });
+    });
+}
+
+// Function to place a bid
+async function placeBid(event, userUID, itemID, currentHighestBid) {
+    event.preventDefault();
+
+    const bidInput = document.getElementById(`bidAmount-${itemID}`);
+    const bidAmount = parseFloat(bidInput.value);
+
+    try {
+        if (bidAmount <= currentHighestBid) {
+            alert("Your bid must be higher than the current highest bid.");
+            return;
+        }
+
+        const user = auth.currentUser;
+        if (!user) {
+            alert("You need to log in to place a bid.");
+            return;
+        }
+
+        const itemRef = db.ref(`onlineAuction/users/${userUID}/auction-items/${itemID}`);
+        await itemRef.update({
+            highestBid: bidAmount,
+            highestBidder: user.uid
+        });
+
+        alert("Bid placed successfully!");
+        fetchAllAuctionItems();
+    } catch (error) {
+        console.error("Error placing bid:", error.message);
+        alert("An error occurred while placing your bid. Please try again.");
+    }
+}
+
 // Function to handle auction item uploads
 async function handleUpload(user) {
     try {
-        // Get form input values
         const itemName = document.getElementById('itemName').value;
         const itemDescription = document.getElementById('itemDescription').value;
         const itemPrice = document.getElementById('itemPrice').value;
-        const itemImage = document.getElementById('itemImage').files[0]; // Get the selected image file
+        const itemImage = document.getElementById('itemImage').files[0];
 
-        console.log("Item Details:", {
-            itemName,
-            itemDescription,
-            itemPrice,
-            itemImage: itemImage.name
-        });
-
-        // Validate that all fields are filled
         if (!itemName || !itemDescription || !itemPrice || !itemImage) {
             alert("All fields must be filled out, including selecting an image.");
             return;
         }
 
-        const userUID = user.uid; // Get the user's UID for storing their items
-        console.log("User UID:", userUID); // Log the user's UID
-
-        // Create a reference for the image in Firebase Storage
+        const userUID = user.uid;
         const storagePath = `auction-items/${userUID}/${itemImage.name}`;
         const storageRefPath = storage.ref(storagePath);
 
-        console.log("Uploading image to storage path:", storagePath);
-
-        // Start uploading the image to Firebase Storage
         const uploadTask = storageRefPath.put(itemImage);
-
-        // Monitor the upload progress
         uploadTask.on('state_changed',
             (snapshot) => {
                 const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('Upload progress:', progress + '% done'); // Log upload progress
-                document.getElementById('uploadProgress').value = progress; // Update progress bar
+                document.getElementById('uploadProgress').value = progress;
             },
             (error) => {
-                console.error("Error during image upload:", error.message); // Log upload error
+                console.error("Error during image upload:", error.message);
                 alert("Error during image upload: " + error.message);
             },
             async () => {
-                // On successful upload, get the image's download URL
                 const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
-                console.log("Image uploaded successfully. Download URL:", downloadURL); // Log the image's download URL
-
-                // Reference to the user's auction items in Firebase Realtime Database
                 const userItemsRef = db.ref(`onlineAuction/users/${userUID}/auction-items`);
                 const newItemRef = userItemsRef.push();
 
-                console.log("Storing auction item details in the database...");
-
-                // Save the auction item details in the Firebase Realtime Database
                 await newItemRef.set({
                     name: itemName,
                     description: itemDescription,
                     price: parseFloat(itemPrice),
-                    imageUrl: downloadURL, // Save the image's download URL
-                    timestamp: Date.now() // Save the upload timestamp
+                    imageUrl: downloadURL,
+                    timestamp: Date.now()
                 });
 
-                console.log("Auction item stored in database successfully.");
-
                 alert("Item uploaded successfully!");
-
-                // Redirect to the home page after a successful upload
                 window.location.href = 'home.html';
             }
         );
     } catch (error) {
-        console.error("Unexpected error during the upload process:", error.message); // Log any unexpected errors
+        console.error("Unexpected error during the upload process:", error.message);
         alert("An unexpected error occurred. Please try again.");
     }
 }
 
-// Function to display the user's auction items
-async function displayAuctionItems(userUID) {
-    try {
-        console.log("Fetching auction items for user:", userUID); // Log user UID when fetching items
-
-        // Reference to the user's auction items in Firebase Realtime Database
-        const userItemsRef = db.ref(`onlineAuction/users/${userUID}/auction-items`);
-
-        // Fetch auction items and listen for changes
-        userItemsRef.on('value', (snapshot) => {
-            const auctionItemsContainer = document.getElementById('auctionItems');
-            auctionItemsContainer.innerHTML = '';  // Clear existing items
-
-            if (snapshot.exists()) {
-                snapshot.forEach((childSnapshot) => {
-                    const itemData = childSnapshot.val();
-                    console.log("Fetched auction item:", itemData); // Log fetched auction item
-
-                    const itemElement = document.createElement('div');
-                    itemElement.classList.add('auction-item');
-                    itemElement.innerHTML = `
-                        <h3>${itemData.name}</h3>
-                        <p>${itemData.description}</p>
-                        <p>Price: $${itemData.price}</p>
-                        <img src="${itemData.imageUrl}" alt="${itemData.name}" width="150" />
-                        <hr>
-                    `;
-                    auctionItemsContainer.appendChild(itemElement);
+// Event listener to handle auction item upload form
+document.addEventListener('DOMContentLoaded', () => {
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            const formElement = document.getElementById('auctionForm');
+            if (formElement) {
+                formElement.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    handleUpload(user);
                 });
-            } else {
-                console.log("No auction items found for user:", userUID); // Log if no items found
-                auctionItemsContainer.innerHTML = `<p>No items uploaded yet.</p>`;
             }
-        });
-    } catch (error) {
-        console.error("Error fetching auction items:", error.message); // Log any errors during fetching
-        alert("Could not fetch auction items. Please reload the page.");
-    }
-}
+        } else {
+            alert("You must be logged in to access this page.");
+            window.location.href = 'login.html';
+        }
+    });
+});

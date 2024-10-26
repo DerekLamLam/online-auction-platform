@@ -41,9 +41,28 @@
         .button-container button:hover {
             background-color: #45a049;
         }
+        .logout-container {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .logout-container button {
+            padding: 10px 20px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .logout-container button:hover {
+            background-color: #e53935;
+        }
     </style>
 </head>
 <body>
+    <div class="logout-container">
+        <button onclick="logout()">Logout</button>
+    </div>
+
     <div class="button-container">
         <button onclick="window.location.href='upload.html'">Upload New Item</button>
     </div>
@@ -54,15 +73,14 @@
     <script>
         // Your web app's Firebase configuration
         const firebaseConfig = {
-        apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
-        authDomain: "onlineauction-ba60b.firebaseapp.com",
-        databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
-        projectId: "onlineauction-ba60b",
-        storageBucket: "onlineauction-ba60b.appspot.com",
-        messagingSenderId: "313811380253",
-        appId: "1:313811380253:web:e80553266413d869dafef4"
+            apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
+            authDomain: "onlineauction-ba60b.firebaseapp.com",
+            databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
+            projectId: "onlineauction-ba60b",
+            storageBucket: "onlineauction-ba60b.appspot.com",
+            messagingSenderId: "313811380253",
+            appId: "1:313811380253:web:e80553266413d869dafef4"
         };
-
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -158,6 +176,17 @@
                 }
             });
         });
+
+        // Function to logout
+        function logout() {
+            auth.signOut().then(() => {
+                alert("You have been logged out successfully.");
+                window.location.href = 'index.html';
+            }).catch((error) => {
+                console.error("Error logging out:", error);
+                alert("An error occurred while logging out. Please try again.");
+            });
+        }
 
         // Function to place a bid with error handling
         async function placeBid(event, userUID, itemID, currentHighestBid) {

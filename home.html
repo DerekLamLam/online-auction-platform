@@ -11,17 +11,47 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
 
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .auction-item { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; background-color: #f9f9f9; }
-        img { max-width: 200px; display: block; margin-top: 10px; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .auction-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+        img {
+            max-width: 200px;
+            display: block;
+            margin-top: 10px;
+        }
+        .button-container {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        .button-container button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button-container button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
+    <div class="button-container">
+        <button onclick="window.location.href='upload.html'">Upload New Item</button>
+    </div>
+
     <h2>All Auction Items</h2>
     <div id="allAuctionItems"></div>
 
     <script>
-        // Firebase configuration
         // Your web app's Firebase configuration
         const firebaseConfig = {
         apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
@@ -99,7 +129,7 @@
                             <p>Highest Bidder: <span id="highestBidder-${itemID}">${highestBidderName}</span></p>
                             <p>Remaining Time: <span id="timer-${itemID}">${remainingTime}</span></p>
                             <p>Seller: ${sellerData.username || 'Unknown'} (${sellerData.email || 'No email provided'})</p>
-                            <img src="${itemData.imageUrl || ''}" alt="${itemData.name}" style="max-width: 200px;">
+                            <img src="${itemData.imageUrl || ''}" alt="${itemData.name}">
                             <form onsubmit="placeBid(event, '${userUID}', '${itemID}', ${currentHighestBid})">
                                 <input type="number" id="bidAmount-${itemID}" placeholder="Enter bid amount" min="${currentHighestBid + 1}" required>
                                 <button type="submit">Place Bid</button>
@@ -117,7 +147,19 @@
             });
         }
 
-        // Function to place a bid
+        // Load all auction items on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    fetchAllAuctionItems();
+                } else {
+                    alert("You must be logged in to view this page.");
+                    window.location.href = 'index.html';
+                }
+            });
+        });
+
+        // Function to place a bid with error handling
         async function placeBid(event, userUID, itemID, currentHighestBid) {
             event.preventDefault();
             const bidInput = document.getElementById(`bidAmount-${itemID}`);
@@ -135,8 +177,10 @@
             }
 
             try {
-                // Update Firebase with the new highest bid and bidder
+                // Reference to the specific auction item in Firebase
                 const itemRef = db.ref(`onlineAuction/users/${userUID}/auction-items/${itemID}`);
+
+                // Update Firebase with the new highest bid and bidder
                 await itemRef.update({
                     highestBid: bidAmount,
                     highestBidder: user.uid
@@ -149,18 +193,6 @@
                 alert("An error occurred while placing your bid. Please try again.");
             }
         }
-
-        // Load all auction items on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            auth.onAuthStateChanged((user) => {
-                if (user) {
-                    fetchAllAuctionItems();
-                } else {
-                    alert("You must be logged in to view this page.");
-                    window.location.href = 'index.html';
-                }
-            });
-        });
     </script>
 </body>
 </html>

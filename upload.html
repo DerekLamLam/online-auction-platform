@@ -11,8 +11,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-storage-compat.js"></script>
 
-    <script src="form.js" defer></script>
-
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -63,9 +61,34 @@
     </form>
 
     <script>
+    // Your web app's Firebase configuration
+        const firebaseConfig = {
+        apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
+        authDomain: "onlineauction-ba60b.firebaseapp.com",
+        databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
+        projectId: "onlineauction-ba60b",
+        storageBucket: "onlineauction-ba60b.appspot.com",
+        messagingSenderId: "313811380253",
+        appId: "1:313811380253:web:e80553266413d869dafef4"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Redirect to login if user is not authenticated
+        firebase.auth().onAuthStateChanged((user) => {
+            if (!user) {
+                alert("You must be logged in to upload items.");
+                window.location.href = "index.html"; // Redirect to login page
+            }
+        });
+
+        // Upload item to Firebase
         async function uploadItem(event) {
             event.preventDefault();
             
+            console.log("Starting upload process...");
+
             const itemName = document.getElementById("itemName").value;
             const description = document.getElementById("description").value;
             const price = parseFloat(document.getElementById("price").value);
@@ -75,27 +98,37 @@
             const user = firebase.auth().currentUser;
             if (!user) {
                 alert("You need to log in to upload items.");
+                console.log("User not logged in.");
                 return;
             }
 
-            const storageRef = firebase.storage().ref();
-            const imageRef = storageRef.child(`images/${imageFile.name}`);
-            await imageRef.put(imageFile);
-            const imageUrl = await imageRef.getDownloadURL();
+            try {
+                console.log("Uploading image to Firebase Storage...");
+                const storageRef = firebase.storage().ref();
+                const imageRef = storageRef.child(`images/${imageFile.name}`);
+                await imageRef.put(imageFile);
+                const imageUrl = await imageRef.getDownloadURL();
+                console.log("Image uploaded successfully:", imageUrl);
 
-            const itemRef = firebase.database().ref(`onlineAuction/users/${user.uid}/auction-items`).push();
-            await itemRef.set({
-                name: itemName,
-                description: description,
-                price: price,
-                highestBid: price,
-                highestBidder: null,
-                endTime: endTime,
-                imageUrl: imageUrl
-            });
+                console.log("Saving item to Firebase Database...");
+                const itemRef = firebase.database().ref(`onlineAuction/users/${user.uid}/auction-items`).push();
+                await itemRef.set({
+                    name: itemName,
+                    description: description,
+                    price: price,
+                    highestBid: price,
+                    highestBidder: null,
+                    endTime: endTime,
+                    imageUrl: imageUrl
+                });
 
-            alert("Item uploaded successfully!");
-            document.getElementById("uploadForm").reset();
+                alert("Item uploaded successfully!");
+                console.log("Item saved successfully to database.");
+                document.getElementById("uploadForm").reset();
+            } catch (error) {
+                console.error("Error during upload process:", error.message);
+                alert("An error occurred: " + error.message);
+            }
         }
     </script>
 </body>

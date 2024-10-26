@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-storage-compat.js"></script>
 
     <style>
         body {
@@ -23,7 +24,9 @@
             background-color: #f9f9f9;
         }
         img {
-            max-width: 150px;
+            max-width: 200px;
+            display: block;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -61,8 +64,22 @@
                 allAuctionItemsContainer.innerHTML = ''; // Clear existing items
 
                 snapshot.forEach((userSnapshot) => {
+                    const sellerData = userSnapshot.val(); // Fetch seller's username and email
                     userSnapshot.child('auction-items').forEach((itemSnapshot) => {
                         const itemData = itemSnapshot.val();
+                        const itemID = itemSnapshot.key;
+                        const userUID = userSnapshot.key;
+
+                        // Get highest bidder's username
+                        let highestBidderName = "No bids yet";
+                        if (itemData.highestBidder) {
+                            db.ref(`onlineAuction/users/${itemData.highestBidder}/username`).once('value')
+                                .then((bidderSnapshot) => {
+                                    highestBidderName = bidderSnapshot.val() || itemData.highestBidder;
+                                    document.getElementById(`highestBidder-${itemID}`).innerText = highestBidderName;
+                                });
+                        }
+
                         const itemElement = document.createElement('div');
                         itemElement.classList.add('auction-item');
                         itemElement.innerHTML = `
@@ -70,9 +87,11 @@
                             <p>Description: ${itemData.description}</p>
                             <p>Starting Price: $${itemData.price}</p>
                             <p>Current Highest Bid: $${itemData.highestBid || itemData.price}</p>
-                            <p>Highest Bidder: ${itemData.highestBidder || 'No bids yet'}</p>
-                            <form onsubmit="placeBid(event, '${userSnapshot.key}', '${itemSnapshot.key}', ${itemData.highestBid || itemData.price})">
-                                <input type="number" id="bidAmount-${itemSnapshot.key}" placeholder="Enter bid amount" min="${itemData.highestBid ? itemData.highestBid + 1 : itemData.price + 1}" required>
+                            <p>Highest Bidder: <span id="highestBidder-${itemID}">${highestBidderName}</span></p>
+                            <p>Seller: ${sellerData.username || 'Unknown'} (${sellerData.email || 'No email provided'})</p>
+                            <img src="${itemData.imageUrl || ''}" alt="${itemData.name}" style="max-width: 200px;">
+                            <form onsubmit="placeBid(event, '${userUID}', '${itemID}', ${itemData.highestBid || itemData.price})">
+                                <input type="number" id="bidAmount-${itemID}" placeholder="Enter bid amount" min="${itemData.highestBid ? itemData.highestBid + 1 : itemData.price + 1}" required>
                                 <button type="submit">Place Bid</button>
                             </form>
                             <hr>
@@ -83,21 +102,19 @@
             });
         }
 
-        // Function to place a bid
+        // Function to place a bid with error handling
         async function placeBid(event, userUID, itemID, currentHighestBid) {
-            event.preventDefault(); // Prevent form submission
+            event.preventDefault();
 
             const bidInput = document.getElementById(`bidAmount-${itemID}`);
             const bidAmount = parseFloat(bidInput.value);
 
             try {
-                // Validate that the bid is higher than the current highest bid
                 if (bidAmount <= currentHighestBid) {
                     alert("Your bid must be higher than the current highest bid.");
                     return;
                 }
 
-                // Ensure the user is logged in
                 const user = auth.currentUser;
                 if (!user) {
                     alert("You need to log in to place a bid.");
@@ -107,16 +124,14 @@
                 // Reference to the specific auction item in Firebase
                 const itemRef = db.ref(`onlineAuction/users/${userUID}/auction-items/${itemID}`);
 
-                // Update the highest bid and bidder in Firebase
+                // Update Firebase with the new highest bid and bidder
                 await itemRef.update({
                     highestBid: bidAmount,
                     highestBidder: user.uid
                 });
 
                 alert("Bid placed successfully!");
-
-                // Optionally, refresh the bid display
-                fetchAllAuctionItems();
+                fetchAllAuctionItems(); // Refresh items to show updated bid
             } catch (error) {
                 console.error("Error placing bid:", error.message);
                 alert("An error occurred while placing your bid. Please try again.");

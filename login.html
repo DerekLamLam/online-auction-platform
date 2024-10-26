@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
+        // Firebase configuration
+       // Your web app's Firebase configuration
+    const firebaseConfig = {
+    apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
+    authDomain: "onlineauction-ba60b.firebaseapp.com",
+    databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
+    projectId: "onlineauction-ba60b",
+    storageBucket: "onlineauction-ba60b.appspot.com",
+    messagingSenderId: "313811380253",
+    appId: "1:313811380253:web:e80553266413d869dafef4"
+    };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const formElement = document.getElementById('loginForm');
+            formElement.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const email = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                // Sign in with Firebase Authentication
+                signInWithEmailAndPassword(auth, email, password)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+
+                        // Save user info to localStorage
+                        localStorage.setItem('loggedInUser', JSON.stringify({
+                            email: user.email,
+                            uid: user.uid
+                        }));
+
+                        // Login successful, redirect to upload.html
+                        alert("Login successful!");
+                        window.location.href = 'upload.html';
+                    })
+                    .catch((error) => {
+                        console.error("Error during login:", error.message);
+                        alert("Invalid email or password. Please try again.");
+                    });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="main">
+        <h1>Welcome to the Online Auction Platform</h1>
+        <h3>Please enter your email and password</h3>
+
+        <form id="loginForm">
+            <label for="username">Email:</label>
+            <input type="email" id="username" name="username" placeholder="Enter your Email" required><br><br>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter your Password" required><br><br>
+
+            <button type="submit">Submit</button>
+        </form>
+
+        <p>Not registered? <a href="register.html">Create an account</a>.</p>
+    </div>
+</body>
+</html>

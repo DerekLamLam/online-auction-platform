@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Auction Item</title>
+
+    <!-- Firebase SDKs in compatibility mode (non-modular) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-storage-compat.js"></script>
+
+    <!-- Link to the JS file (form.js) -->
+    <script src="form.js" defer></script>
+</head>
+<body>
+    <h2>Upload Auction Item</h2>
+
+    <!-- Auction Item Upload Form -->
+    <form id="auctionForm" enctype="multipart/form-data">
+        <label for="itemName">Item Name:</label><br>
+        <input type="text" id="itemName" name="itemName" required><br><br>
+
+        <label for="itemDescription">Item Description:</label><br>
+        <input type="text" id="itemDescription" name="itemDescription" required><br><br>
+
+        <label for="itemPrice">Starting Price (USD):</label><br>
+        <input type="number" id="itemPrice" name="itemPrice" required min="0.01" step="0.01"><br><br>
+
+        <label for="itemImage">Upload Item Image:</label><br>
+        <input type="file" id="itemImage" name="itemImage" accept="image/*" required><br><br>
+
+        <progress id="uploadProgress" value="0" max="100"></progress><br><br>
+
+        <button type="submit" id="uploadButton">Upload Item</button>
+    </form>
+
+    <!-- Button to go to the Home Page -->
+    <button id="goToHomePageButton" onclick="goToHomePage()">Go to the Home Page</button>
+
+    <script>
+        // Function to redirect to the home page
+        function goToHomePage() {
+            window.location.href = 'home.html';
+        }
+    </script>
+</body>
+</html>

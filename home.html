@@ -3,25 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auction Homepage</title>
-    <!-- Firebase SDKs (update version if necessary) -->
+    <title>All Auction Items</title>
+
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
-    <!-- Link to form.js -->
-    <script src="form.js" defer></script>
+
     <style>
-        body { font-family: Arial, sans-serif; }
-        .auction-item { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .auction-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+        img {
+            max-width: 150px;
+        }
     </style>
 </head>
 <body>
     <h2>All Auction Items</h2>
-    <div id="allAuctionItems"></div>
+
+    <!-- Container to display all auction items -->
+    <div id="allAuctionItems">
+        <!-- Auction items will be displayed here -->
+    </div>
 
     <script>
-        // Firebase configuration
-        // Your web app's Firebase configuration
+    // Your web app's Firebase configuration
         const firebaseConfig = {
         apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
         authDomain: "onlineauction-ba60b.firebaseapp.com",
@@ -32,10 +47,13 @@
         appId: "1:313811380253:web:e80553266413d869dafef4"
         };
 
+
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
         const db = firebase.database();
 
-        // Fetch and display all auction items
+        // Function to fetch and display all auction items
         async function fetchAllAuctionItems() {
             const usersRef = db.ref('onlineAuction/users');
             usersRef.on('value', (snapshot) => {
@@ -52,9 +70,9 @@
                             <p>Description: ${itemData.description}</p>
                             <p>Starting Price: $${itemData.price}</p>
                             <p>Current Highest Bid: $${itemData.highestBid || itemData.price}</p>
-                            <p>Highest Bidder: ${itemData.highestBidder ? itemData.highestBidder : 'No bids yet'}</p>
+                            <p>Highest Bidder: ${itemData.highestBidder || 'No bids yet'}</p>
                             <form onsubmit="placeBid(event, '${userSnapshot.key}', '${itemSnapshot.key}', ${itemData.highestBid || itemData.price})">
-                                <input type="number" id="bidAmount-${itemSnapshot.key}" placeholder="Enter bid amount" min="${itemData.highestBid || itemData.price + 1}" required>
+                                <input type="number" id="bidAmount-${itemSnapshot.key}" placeholder="Enter bid amount" min="${itemData.highestBid ? itemData.highestBid + 1 : itemData.price + 1}" required>
                                 <button type="submit">Place Bid</button>
                             </form>
                             <hr>
@@ -65,8 +83,57 @@
             });
         }
 
+        // Function to place a bid
+        async function placeBid(event, userUID, itemID, currentHighestBid) {
+            event.preventDefault(); // Prevent form submission
+
+            const bidInput = document.getElementById(`bidAmount-${itemID}`);
+            const bidAmount = parseFloat(bidInput.value);
+
+            try {
+                // Validate that the bid is higher than the current highest bid
+                if (bidAmount <= currentHighestBid) {
+                    alert("Your bid must be higher than the current highest bid.");
+                    return;
+                }
+
+                // Ensure the user is logged in
+                const user = auth.currentUser;
+                if (!user) {
+                    alert("You need to log in to place a bid.");
+                    return;
+                }
+
+                // Reference to the specific auction item in Firebase
+                const itemRef = db.ref(`onlineAuction/users/${userUID}/auction-items/${itemID}`);
+
+                // Update the highest bid and bidder in Firebase
+                await itemRef.update({
+                    highestBid: bidAmount,
+                    highestBidder: user.uid
+                });
+
+                alert("Bid placed successfully!");
+
+                // Optionally, refresh the bid display
+                fetchAllAuctionItems();
+            } catch (error) {
+                console.error("Error placing bid:", error.message);
+                alert("An error occurred while placing your bid. Please try again.");
+            }
+        }
+
         // Load all auction items on page load
-        fetchAllAuctionItems();
+        document.addEventListener('DOMContentLoaded', () => {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    fetchAllAuctionItems();
+                } else {
+                    alert("You must be logged in to view this page.");
+                    window.location.href = 'login.html';
+                }
+            });
+        });
     </script>
 </body>
 </html>

@@ -14,7 +14,29 @@ const auth = firebase.auth();
 const db = firebase.database();
 const storage = firebase.storage();
 
-// Function to fetch and display all auction items with seller info and item images
+// Function to calculate remaining time in "Xd Xh Xm" format
+function calculateRemainingTime(endTime) {
+    const now = Date.now();
+    const timeDiff = endTime - now;
+
+    if (timeDiff <= 0) {
+        return "Auction ended";
+    }
+
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (days > 0) {
+        return `${days}d ${hours}h ${minutes}m`;
+    } else if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+    } else {
+        return `${minutes}m`;
+    }
+}
+
+// Function to fetch and display all auction items with seller info, item images, and timer
 async function fetchAllAuctionItems() {
     const usersRef = db.ref('onlineAuction/users');
     usersRef.on('value', async (snapshot) => {
@@ -39,6 +61,9 @@ async function fetchAllAuctionItems() {
                         });
                 }
 
+                // Calculate remaining time
+                const remainingTime = calculateRemainingTime(itemData.endTime);
+
                 const itemElement = document.createElement('div');
                 itemElement.classList.add('auction-item');
                 itemElement.innerHTML = `
@@ -47,6 +72,7 @@ async function fetchAllAuctionItems() {
                     <p>Starting Price: $${itemData.price}</p>
                     <p>Current Highest Bid: $${currentHighestBid}</p>
                     <p>Highest Bidder: <span id="highestBidder-${itemID}">${highestBidderName}</span></p>
+                    <p>Remaining Time: <span id="timer-${itemID}">${remainingTime}</span></p>
                     <p>Seller: ${sellerData.username || 'Unknown'} (${sellerData.email || 'No email provided'})</p>
                     <img src="${itemData.imageUrl || ''}" alt="${itemData.name}" style="max-width: 200px;">
                     <form onsubmit="placeBid(event, '${userUID}', '${itemID}', ${currentHighestBid})">
@@ -56,12 +82,17 @@ async function fetchAllAuctionItems() {
                     <hr>
                 `;
                 allAuctionItemsContainer.appendChild(itemElement);
+
+                // Update timer every minute
+                setInterval(() => {
+                    document.getElementById(`timer-${itemID}`).innerText = calculateRemainingTime(itemData.endTime);
+                }, 60000); // Update every 60 seconds
             });
         });
     });
 }
 
-// Function to place a bid with error handling and debugging
+// Function to place a bid with error handling
 async function placeBid(event, userUID, itemID, currentHighestBid) {
     event.preventDefault();
 
@@ -71,7 +102,6 @@ async function placeBid(event, userUID, itemID, currentHighestBid) {
     console.log("Attempting to place bid", { userUID, itemID, bidAmount, currentHighestBid });
 
     try {
-        // Ensure the bid is higher than the current highest bid
         if (bidAmount <= currentHighestBid) {
             alert("Your bid must be higher than the current highest bid.");
             return;

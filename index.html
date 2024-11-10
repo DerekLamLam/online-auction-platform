@@ -3,87 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            max-width: 400px;
-            width: 100%;
-            padding: 30px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            text-align: center;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-        label {
-            display: block;
-            text-align: left;
-            font-weight: bold;
-            color: #555;
-            margin-top: 10px;
-        }
-        input[type="email"], input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        p {
-            margin-top: 15px;
-            font-size: 14px;
-        }
-        p a {
-            color: #4CAF50;
-            text-decoration: none;
-        }
-        p a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <title>Register Page</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+
+// Your web app's Firebase configuration
+    const firebaseConfig = {
+    apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
+    authDomain: "onlineauction-ba60b.firebaseapp.com",
+    databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
+    projectId: "onlineauction-ba60b",
+    storageBucket: "onlineauction-ba60b.appspot.com",
+    messagingSenderId: "313811380253",
+    appId: "1:313811380253:web:e80553266413d869dafef4"
+    };
+
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const formElement = document.getElementById('registerForm');
+            formElement.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const username = document.getElementById('username').value;
+                const hkid = document.getElementById('hkid').value;
+                const email = document.getElementById('Email').value;
+                const password = document.getElementById('password').value;
+                const fullname = document.getElementById('fullname').value;
+                const phoneNumber = document.getElementById('phonenum').value;
+                const address = document.getElementById('Address').value;
+
+                // Register the user using Firebase Authentication
+                createUserWithEmailAndPassword(auth, email, password)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+
+                        // Save additional user info to the Realtime Database
+                        const newUserRef = ref(db, `onlineAuction/users/${user.uid}`);
+                        return set(newUserRef, {
+                            username: username,
+                            hkid: hkid,
+                            email: email,
+                            fullname: fullname,
+                            phoneNumber: phoneNumber,
+                            address: address
+                        });
+                    })
+                    .then(() => {
+                        alert("Registration successful!");
+                        window.location.href = "login.html";  // Redirect to login page
+                    })
+                    .catch((error) => {
+                        console.error("Error during registration:", error.message);
+                        alert("Error during registration: " + error.message);
+                    });
+            });
+        });
+    </script>
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to the Online Auction Platform</h1>
-        <form id="loginForm">
-            <label for="username">Email:</label>
-            <input type="email" id="username" name="username" placeholder="Enter your Email" required>
+    <div class="main">
+        <h1>Register Page</h1> 
+        <form id="registerForm">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" placeholder="Enter your Username" required><br><br>
+
+            <label for="hkid">HKID Number:</label>
+            <input type="text" id="hkid" name="hkid" placeholder="Enter your HKID number" required><br><br>
+
+            <label for="fullname">Fullname:</label>
+            <input type="text" id="fullname" name="fullname" placeholder="Enter your Fullname" required><br><br>
+
+            <label for="phonenum">Phone Number:</label>
+            <input type="tel" id="phonenum" name="phonenum" placeholder="Enter your Phone number" required><br><br>
+
+            <label for="Address">Address:</label>
+            <input type="text" id="Address" name="Address" placeholder="Enter your Address" required><br><br>
+
+            <label for="Email">Email:</label>
+            <input type="email" id="Email" name="Email" placeholder="Enter your Email" required><br><br>
 
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Enter your Password" required>
+            <input type="text" id="password" name="password" placeholder="Enter your Password" required><br><br>
 
-            <button type="submit">Login</button>
+            <button type="submit" class="registerbtn">Register</button><br><br>
         </form>
 
-        <p>Not registered? <a href="register.html">Create an account</a>.</p>
+        <p>Already have an account? <a href="index.html">Sign in</a>.</p>
     </div>
 </body>
 </html>

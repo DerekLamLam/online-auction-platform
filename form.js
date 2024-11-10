@@ -130,15 +130,19 @@ async function placeBid(event, userUID, itemID, currentHighestBid) {
         alert("An error occurred while placing your bid. Please try again.");
     }
 }
-
-// Check if the user is logged in on page load
-document.addEventListener('DOMContentLoaded', () => {
+// Check if user is authenticated (  edit.html)
+function checkUserAuthentication(redirectUrl = "index.html") {
     auth.onAuthStateChanged((user) => {
-        if (user) {
-            fetchAllAuctionItems();
-        } else {
-            alert("You must be logged in to view this page.");
-            window.location.href = 'index.html';
+        if (!user) {
+            alert("You must be logged in to access this page.");
+            window.location.href = redirectUrl;
         }
     });
+}
+
+// Example: Usage of checkUserAuthentication for pages requiring login
+document.addEventListener("DOMContentLoaded", () => {
+    checkUserAuthentication(); // This will ensure the user is logged in when accessing edit.html
 });
+
+

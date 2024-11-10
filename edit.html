@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Auction Items</title>
 
-    <!-- Include Firebase SDKs and form.js -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-storage-compat.js"></script>
-    <script src="form.js"></script> <!-- form.js handles Firebase initialization and logout -->
+
+    <!-- Load custom form.js if it contains Firebase config and logout functionality -->
+    <script src="form.js"></script>
 
     <style>
         body {
@@ -42,10 +44,6 @@
             background-color: #fff;
         }
 
-        .item h3 {
-            margin: 0;
-        }
-
         label {
             display: block;
             margin: 10px 0 5px;
@@ -60,7 +58,6 @@
             border-radius: 4px;
         }
 
-        /* Smaller button styling for Logout and Options, aligned horizontally */
         .top-button-container {
             display: flex;
             justify-content: flex-start;
@@ -69,7 +66,7 @@
         }
 
         .top-button-container button {
-            background-color: #4CAF50; /* Default green for options */
+            background-color: #4CAF50;
             color: white;
             padding: 5px 10px;
             font-size: 12px;
@@ -78,16 +75,10 @@
             cursor: pointer;
         }
 
-        /* Specific color for Logout */
         .logout-button {
             background-color: #f44336;
         }
 
-        .logout-button:hover, .options-button:hover {
-            opacity: 0.9;
-        }
-
-        /* Styles for Save Changes and Delete buttons */
         .action-button-container {
             display: flex;
             gap: 10px;
@@ -110,16 +101,11 @@
         .delete-button {
             background-color: #f44336;
         }
-
-        .save-button:hover, .delete-button:hover {
-            opacity: 0.9;
-        }
     </style>
 </head>
 <body>
-    <!-- Smaller Buttons for Logout and Go to Options at the top -->
     <div class="top-button-container">
-        <button class="options-button" onclick="window.location.href='option.html'">Go to Options</button>
+        <button class="options-button" onclick="window.location.href='options.html'">Go to Options</button>
         <button class="logout-button" onclick="logout()">Logout</button>
     </div>
 
@@ -129,7 +115,7 @@
     </div>
 
     <script>
-        // Ensure Firebase is initialized if it isn't already
+        // Firebase configuration (if not initialized in form.js)
         if (!firebase.apps.length) {
             const firebaseConfig = {
             apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
@@ -139,18 +125,18 @@
             storageBucket: "onlineauction-ba60b.appspot.com",
             messagingSenderId: "313811380253",
             appId: "1:313811380253:web:e80553266413d869dafef4"
-        };
-
+            };
             firebase.initializeApp(firebaseConfig);
         }
-        
+
         const auth = firebase.auth();
         const db = firebase.database();
 
         // Ensure user is logged in
         auth.onAuthStateChanged((user) => {
             if (user) {
-                loadUserItems(user.uid);
+                console.log("User authenticated:", user.uid);
+                loadUserItems(user.uid); // Load items for the authenticated user
             } else {
                 alert("You must be logged in to edit items.");
                 window.location.href = "index.html";
@@ -164,6 +150,7 @@
                 const itemList = document.getElementById('itemList');
                 itemList.innerHTML = ''; // Clear existing items
 
+                console.log("Snapshot exists:", snapshot.exists());
                 if (!snapshot.exists()) {
                     itemList.innerHTML = "<p>No items found.</p>";
                     return;
@@ -172,6 +159,7 @@
                 snapshot.forEach((childSnapshot) => {
                     const item = childSnapshot.val();
                     const itemId = childSnapshot.key;
+                    console.log("Item loaded:", item);
 
                     const itemDiv = document.createElement('div');
                     itemDiv.classList.add('item');
@@ -214,36 +202,21 @@
             const endTime = new Date(document.getElementById(`endTime-${itemId}`).value).getTime();
             const imageFile = document.getElementById(`image-${itemId}`).files[0];
 
-            // Reference to the item in the database
             const itemRef = db.ref(`onlineAuction/users/${userId}/auction-items/${itemId}`);
-
-            // If a new image is selected, upload it
+            
             if (imageFile) {
                 const storageRef = firebase.storage().ref();
                 const imageRef = storageRef.child(`images/${userId}/${itemId}/${imageFile.name}`);
-
                 try {
-                    await imageRef.put(imageFile); // Upload image
-                    const imageUrl = await imageRef.getDownloadURL(); // Get image URL
-                    await itemRef.update({ // Update the item with the new image URL and other fields
-                        name: name,
-                        description: description,
-                        price: price,
-                        endTime: endTime,
-                        imageUrl: imageUrl
-                    });
+                    await imageRef.put(imageFile);
+                    const imageUrl = await imageRef.getDownloadURL();
+                    await itemRef.update({ name, description, price, endTime, imageUrl });
                     alert("Item updated successfully with new image!");
                 } catch (error) {
                     alert("Error updating item with image: " + error.message);
                 }
             } else {
-                // Update the item without changing the image URL
-                itemRef.update({
-                    name: name,
-                    description: description,
-                    price: price,
-                    endTime: endTime
-                })
+                itemRef.update({ name, description, price, endTime })
                 .then(() => alert("Item updated successfully!"))
                 .catch((error) => alert("Error updating item: " + error.message));
             }

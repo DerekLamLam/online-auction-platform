@@ -60,35 +60,45 @@
             border-radius: 4px;
         }
 
+        /* Style for the button container */
         .button-container {
-            text-align: right;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
         }
 
-        .button-container button {
-            padding: 10px 20px;
-            margin: 5px;
+        /* Style for Logout button */
+        .logout-button {
+            background-color: #f44336;
+            color: white;
+            padding: 15px 30px;
+            font-size: 16px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            color: white;
         }
 
-        .edit-button {
+        /* Style for Go to Options button */
+        .options-button {
             background-color: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
 
-        .delete-button {
-            background-color: #f44336;
-        }
-
-        .button-container button:hover {
+        .logout-button:hover, .options-button:hover {
             opacity: 0.9;
         }
     </style>
 </head>
 <body>
+    <!-- Buttons for Logout and Go to Options -->
     <div class="button-container">
-        <button id="logoutButton" onclick="logout()">Logout</button> <!-- Logout button -->
+        <button class="options-button" onclick="window.location.href='options.html'">Go to Options</button>
+        <button class="logout-button" onclick="logout()">Logout</button>
     </div>
 
     <div class="container">

@@ -9,16 +9,15 @@
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
         // Firebase configuration
-       // Your web app's Firebase configuration
-    const firebaseConfig = {
-    apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
-    authDomain: "onlineauction-ba60b.firebaseapp.com",
-    databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
-    projectId: "onlineauction-ba60b",
-    storageBucket: "onlineauction-ba60b.appspot.com",
-    messagingSenderId: "313811380253",
-    appId: "1:313811380253:web:e80553266413d869dafef4"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
+            authDomain: "onlineauction-ba60b.firebaseapp.com",
+            databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
+            projectId: "onlineauction-ba60b",
+            storageBucket: "onlineauction-ba60b.appspot.com",
+            messagingSenderId: "313811380253",
+            appId: "1:313811380253:web:e80553266413d869dafef4"
+        };
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
@@ -43,7 +42,7 @@
                             uid: user.uid
                         }));
 
-                        // Login successful, redirect to upload.html
+                        // Login successful, redirect to option.html
                         alert("Login successful!");
                         window.location.href = 'option.html';
                     })
@@ -54,6 +53,81 @@
             });
         });
     </script>
+
+    <style>
+        /* Improved UI styling */
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            height: 100vh;
+            margin: 0;
+        }
+        .main {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        h3 {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        p {
+            color: #333;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <div class="main">
@@ -62,10 +136,10 @@
 
         <form id="loginForm">
             <label for="username">Email:</label>
-            <input type="email" id="username" name="username" placeholder="Enter your Email" required><br><br>
+            <input type="email" id="username" name="username" placeholder="Enter your Email" required>
 
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Enter your Password" required><br><br>
+            <input type="password" id="password" name="password" placeholder="Enter your Password" required>
 
             <button type="submit">Submit</button>
         </form>

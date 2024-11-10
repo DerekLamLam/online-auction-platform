@@ -1,5 +1,5 @@
 // Your web app's Firebase configuration
-    const firebaseConfig = {
+const firebaseConfig = {
     apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
     authDomain: "onlineauction-ba60b.firebaseapp.com",
     databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
@@ -137,12 +137,10 @@ async function placeBid(event, userUID, itemID, currentHighestBid) {
 }
 // Logout Function
 function logout() {
-    auth.signOut()
-        .then(() => {
+    auth.signOut().then(() => {
             alert("You have been logged out successfully.");
             window.location.href = "index.html"; // Redirect to login page after logout
-        })
-        .catch((error) => {
+        }).catch((error) => {
             console.error("Error logging out:", error);
             alert("An error occurred while logging out. Please try again.");
         });

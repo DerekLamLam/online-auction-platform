@@ -136,6 +136,21 @@ async function placeBid(event, userUID, itemID, currentHighestBid) {
         alert("An error occurred while placing your bid. Please try again.");
     }
 }
+// Login Function
+function login() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+            alert("Login successful!");
+            window.location.href = 'home.html'; // Redirect to homepage
+        })
+        .catch(error => {
+            console.error("Error during login:", error.message);
+            alert("Login failed: " + error.message);
+        });
+}
 // Logout Function
 function logout() {
     auth.signOut().then(() => {
@@ -144,6 +159,37 @@ function logout() {
         }).catch((error) => {
             console.error("Error logging out:", error);
             alert("An error occurred while logging out. Please try again.");
+        });
+}
+// Register Function
+function register() {
+    const username = document.getElementById('username').value;
+    const hkid = document.getElementById('hkid').value;
+    const email = document.getElementById('Email').value;
+    const password = document.getElementById('password').value;
+    const fullname = document.getElementById('fullname').value;
+    const phoneNumber = document.getElementById('phonenum').value;
+    const address = document.getElementById('Address').value;
+
+    auth.createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            return db.ref(`onlineAuction/users/${user.uid}`).set({
+                username,
+                hkid,
+                email,
+                fullname,
+                phoneNumber,
+                address
+            });
+        })
+        .then(() => {
+            alert("Registration successful!");
+            window.location.href = 'index.html'; // Redirect to login page
+        })
+        .catch(error => {
+            console.error("Error during registration:", error.message);
+            alert("Registration failed: " + error.message);
         });
 }
 

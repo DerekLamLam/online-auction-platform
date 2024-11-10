@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="form.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Auction Items</title>
 
-    <!-- Firebase SDKs -->
+    <!-- Include Firebase SDKs and form.js -->
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
+    <script src="form.js"></script> <!-- form.js handles Firebase initialization and logout -->
 
     <style>
         body {
@@ -86,31 +86,16 @@
     </style>
 </head>
 <body>
+    <div class="button-container">
+        <button id="logoutButton" onclick="logout()">Logout</button> <!-- Logout button -->
+    </div>
+
     <div class="container">
         <h2>Edit Your Auction Items</h2>
         <div id="itemList"></div>
     </div>
-    <div class="button-container">
-    <button id="logoutButton" onclick="logout()">Logout</button> <!-- Uses logout() from form.js -->
-    </div>
 
     <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
-            authDomain: "onlineauction-ba60b.firebaseapp.com",
-            databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
-            projectId: "onlineauction-ba60b",
-            storageBucket: "onlineauction-ba60b.appspot.com",
-            messagingSenderId: "313811380253",
-            appId: "1:313811380253:web:e80553266413d869dafef4"
-        };
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
-
         // Ensure user is logged in
         auth.onAuthStateChanged((user) => {
             if (user) {
@@ -178,4 +163,14 @@
         }
 
         // Function to delete an item
-        function deleteIte
+        function deleteItem(userId, itemId) {
+            if (confirm("Are you sure you want to delete this item?")) {
+                const itemRef = db.ref(`onlineAuction/users/${userId}/auction-items/${itemId}`);
+                itemRef.remove()
+                .then(() => alert("Item deleted successfully!"))
+                .catch((error) => alert("Error deleting item: " + error.message));
+            }
+        }
+    </script>
+</body>
+</html>

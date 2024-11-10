@@ -4,7 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
-    <script src="form.js"></script>
+    <script src="form.js">
+         document.addEventListener('DOMContentLoaded', () => {
+     const formElement = document.getElementById('loginForm');
+     formElement.addEventListener('submit', function (e) {
+         e.preventDefault();
+
+         const email = document.getElementById('username').value;
+         const password = document.getElementById('password').value;
+
+         // Sign in with Firebase Authentication
+         signInWithEmailAndPassword(auth, email, password)
+             .then((userCredential) => {
+                 const user = userCredential.user;
+
+                 // Save user info to localStorage
+                 localStorage.setItem('loggedInUser', JSON.stringify({
+                     email: user.email,
+                     uid: user.uid
+                 }));
+
+                 // Login successful, redirect to upload.html
+                 alert("Login successful!");
+                 window.location.href = 'upload.html';
+             })
+             .catch((error) => {
+                 console.error("Error during login:", error.message);
+                 alert("Invalid email or password. Please try again.");
+             });
+     });
+ });
+    </script>
         
     <style>
         body {

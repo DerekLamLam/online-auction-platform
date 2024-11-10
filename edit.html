@@ -116,7 +116,6 @@
         }
     </style>
 </head>
-    
 <body>
     <!-- Top Buttons: Go to Option (left) and Logout (right) -->
     <div class="top-buttons">
@@ -130,20 +129,6 @@
     </div>
 
     <script>
-        // Firebase configuration (if not initialized in form.js)
-        if (!firebase.apps.length) {
-            const firebaseConfig = {
-            apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
-            authDomain: "onlineauction-ba60b.firebaseapp.com",
-            databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
-            projectId: "onlineauction-ba60b",
-            storageBucket: "onlineauction-ba60b.appspot.com",
-            messagingSenderId: "313811380253",
-            appId: "1:313811380253:web:e80553266413d869dafef4"
-            };
-            firebase.initializeApp(firebaseConfig);
-        }
-
         const auth = firebase.auth();
         const db = firebase.database();
 

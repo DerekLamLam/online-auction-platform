@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Auction Item</title>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-storage-compat.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .form-container {
+            max-width: 400px;
+            width: 100%;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .button-container, .logout-container {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .button-container button, .logout-container button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button-container button {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .logout-container button {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .logout-container button:hover {
+            background-color: #e53935;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        form input, form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        form button[type="submit"] {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        form button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        #progressContainer {
+            display: none;
+            margin-top: 10px;
+        }
+
+        #progressBar {
+            width: 100%;
+            height: 20px;
+            background-color: #f3f3f3;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        #progressFill {
+            height: 100%;
+            width: 0%;
+            background-color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="button-container">
+            <button onclick="window.location.href='home.html'">Go to Homepage</button>
+        </div>
+        <div class="logout-container">
+            <button onclick="logout()">Logout</button>
+        </div>
+        
+        <h2>Upload Auction Item</h2>
+        <form id="uploadForm" onsubmit="uploadItem(event)">
+            <label for="itemName">Item Name:</label>
+            <input type="text" id="itemName" required>
+
+            <label for="description">Description:</label>
+            <textarea id="description" required rows="4"></textarea>
+
+            <label for="price">Starting Price:</label>
+            <input type="number" id="price" required>
+
+            <label for="image">Item Image:</label>
+            <input type="file" id="image" accept="image/*" required>
+
+            <label for="endTime">Auction End Time:</label>
+            <input type="datetime-local" id="endTime" required>
+
+            <button type="submit">Upload Item</button>
+        </form>
+
+        <div id="progressContainer">
+            <p>Uploading: <span id="progressText">0%</span></p>
+            <div id="progressBar">
+                <div id="progressFill"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
+            authDomain: "onlineauction-ba60b.firebaseapp.com",
+            databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
+            projectId: "onlineauction-ba60b",
+            storageBucket: "onlineauction-ba60b.appspot.com",
+            messagingSenderId: "313811380253",
+            appId: "1:313811380253:web:e80553266413d869dafef4"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (!user) {
+                alert("You must be logged in to upload items.");
+                window.location.href = "index.html";
+            }
+        });
+
+        async function uploadItem(event) {
+            event.preventDefault();
+
+            const itemName = document.getElementById("itemName").value;
+            const description = document.getElementById("description").value;
+            const price = parseFloat(document.getElementById("price").value);
+            const endTime = new Date(document.getElementById("endTime").value).getTime();
+            const imageFile = document.getElementById("image").files[0];
+            const user = firebase.auth().currentUser;
+
+            try {
+                const storageRef = firebase.storage().ref();
+                const imageRef = storageRef.child(`images/${imageFile.name}`);
+
+                document.getElementById("progressContainer").style.display = "block";
+                const uploadTask = imageRef.put(imageFile);
+
+                uploadTask.on('state_changed', (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    document.getElementById("progressText").innerText = `${Math.floor(progress)}%`;
+                    document.getElementById("progressFill").style.width = `${progress}%`;
+                }, (error) => {
+                    alert("Error during upload: " + error.message);
+                }, async () => {
+                    const imageUrl = await uploadTask.snapshot.ref.getDownloadURL();
+                    const itemRef = firebase.database().ref(`onlineAuction/users/${user.uid}/auction-items`).push();
+                    await itemRef.set({
+                        name: itemName,
+                        description: description,
+                        price: price,
+                        highestBid: price,
+                        highestBidder: null,
+                        endTime: endTime,
+                        imageUrl: imageUrl
+                    });
+
+                    alert("Item uploaded successfully!");
+                    window.location.href = "home.html";
+                });
+            } catch (error) {
+                alert("Error during upload: " + error.message);
+            }
+        }
+
+        // Logout function
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                alert("You have been logged out successfully.");
+                window.location.href = 'index.html';
+            }).catch((error) => {
+                console.error("Error logging out:", error);
+                alert("An error occurred while logging out. Please try again.");
+            });
+        }
+    </script>
+</body>
+</html>

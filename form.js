@@ -137,36 +137,6 @@ async function placeBid(event, userUID, itemID, currentHighestBid) {
     }
 }
 
-// Login functionality
-document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('loginForm');
-    loginForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
-        // Sign in with Firebase Authentication
-        auth.signInWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                const user = userCredential.user;
-
-                // Save user info to localStorage
-                localStorage.setItem('loggedInUser', JSON.stringify({
-                    email: user.email,
-                    uid: user.uid
-                }));
-
-                // Login successful, redirect to upload.html
-                alert("Login successful!");
-                window.location.href = 'upload.html';
-            })
-            .catch((error) => {
-                console.error("Error during login:", error.message);
-                alert("Invalid email or password. Please try again.");
-            });
-    });
-});
 // Logout Function
 function logout() {
     auth.signOut().then(() => {
@@ -177,38 +147,6 @@ function logout() {
             alert("An error occurred while logging out. Please try again.");
         });
 }
-// Register Function
-function register() {
-    const username = document.getElementById('username').value;
-    const hkid = document.getElementById('hkid').value;
-    const email = document.getElementById('Email').value;
-    const password = document.getElementById('password').value;
-    const fullname = document.getElementById('fullname').value;
-    const phoneNumber = document.getElementById('phonenum').value;
-    const address = document.getElementById('Address').value;
-
-    auth.createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-            const user = userCredential.user;
-            return db.ref(`onlineAuction/users/${user.uid}`).set({
-                username,
-                hkid,
-                email,
-                fullname,
-                phoneNumber,
-                address
-            });
-        })
-        .then(() => {
-            alert("Registration successful!");
-            window.location.href = 'index.html'; // Redirect to login page
-        })
-        .catch(error => {
-            console.error("Error during registration:", error.message);
-            alert("Registration failed: " + error.message);
-        });
-}
-
 // Check if user is authenticated (  edit.html)
 function checkUserAuthentication(redirectUrl = "index.html") {
     auth.onAuthStateChanged((user) => {

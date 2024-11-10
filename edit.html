@@ -60,43 +60,65 @@
             border-radius: 4px;
         }
 
-        /* Style for the button container */
-        .button-container {
+        /* Smaller styling for Logout and Options buttons */
+        .top-button-container {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
+            gap: 10px;
             margin-bottom: 20px;
         }
 
-        /* Style for Logout button */
-        .logout-button {
-            background-color: #f44336;
+        .logout-button, .options-button {
+            background-color: #4CAF50; /* Default green for options */
             color: white;
-            padding: 15px 30px;
-            font-size: 16px;
+            padding: 8px 15px;
+            font-size: 12px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
 
-        /* Style for Go to Options button */
-        .options-button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 15px 30px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        /* Specific color for Logout */
+        .logout-button {
+            background-color: #f44336;
         }
 
         .logout-button:hover, .options-button:hover {
             opacity: 0.9;
         }
+
+        /* Styles for Save Changes and Delete buttons */
+        .action-button-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .save-button, .delete-button {
+            flex: 1;
+            padding: 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .save-button {
+            background-color: #4CAF50;
+        }
+
+        .delete-button {
+            background-color: #f44336;
+        }
+
+        .save-button:hover, .delete-button:hover {
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body>
-    <!-- Buttons for Logout and Go to Options -->
-    <div class="button-container">
+    <!-- Smaller Buttons for Logout and Go to Options -->
+    <div class="top-button-container">
         <button class="options-button" onclick="window.location.href='options.html'">Go to Options</button>
         <button class="logout-button" onclick="logout()">Logout</button>
     </div>
@@ -150,8 +172,8 @@
                         <label for="endTime-${itemId}">Auction End Time:</label>
                         <input type="datetime-local" id="endTime-${itemId}" value="${new Date(item.endTime).toISOString().slice(0, 16)}">
 
-                        <div class="button-container">
-                            <button class="edit-button" onclick="editItem('${userId}', '${itemId}')">Save Changes</button>
+                        <div class="action-button-container">
+                            <button class="save-button" onclick="editItem('${userId}', '${itemId}')">Save Changes</button>
                             <button class="delete-button" onclick="deleteItem('${userId}', '${itemId}')">Delete</button>
                         </div>
                     `;

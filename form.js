@@ -136,21 +136,37 @@ async function placeBid(event, userUID, itemID, currentHighestBid) {
         alert("An error occurred while placing your bid. Please try again.");
     }
 }
-// Login Function
-function login() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
 
-    auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-            alert("Login successful!");
-            window.location.href = 'home.html'; // Redirect to homepage
-        })
-        .catch(error => {
-            console.error("Error during login:", error.message);
-            alert("Login failed: " + error.message);
-        });
-}
+// Login functionality
+document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        // Sign in with Firebase Authentication
+        auth.signInWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                const user = userCredential.user;
+
+                // Save user info to localStorage
+                localStorage.setItem('loggedInUser', JSON.stringify({
+                    email: user.email,
+                    uid: user.uid
+                }));
+
+                // Login successful, redirect to upload.html
+                alert("Login successful!");
+                window.location.href = 'upload.html';
+            })
+            .catch((error) => {
+                console.error("Error during login:", error.message);
+                alert("Invalid email or password. Please try again.");
+            });
+    });
+});
 // Logout Function
 function logout() {
     auth.signOut().then(() => {

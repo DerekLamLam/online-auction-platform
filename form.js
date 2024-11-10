@@ -9,6 +9,11 @@
     appId: "1:313811380253:web:e80553266413d869dafef4"
     };
 
+// Initialize Firebase if it hasn't been initialized elsewhere
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -130,6 +135,19 @@ async function placeBid(event, userUID, itemID, currentHighestBid) {
         alert("An error occurred while placing your bid. Please try again.");
     }
 }
+// Logout Function
+function logout() {
+    auth.signOut()
+        .then(() => {
+            alert("You have been logged out successfully.");
+            window.location.href = "index.html"; // Redirect to login page after logout
+        })
+        .catch((error) => {
+            console.error("Error logging out:", error);
+            alert("An error occurred while logging out. Please try again.");
+        });
+}
+
 // Check if user is authenticated (  edit.html)
 function checkUserAuthentication(redirectUrl = "index.html") {
     auth.onAuthStateChanged((user) => {

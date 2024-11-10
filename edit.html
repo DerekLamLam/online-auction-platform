@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-storage-compat.js"></script>
     <script src="form.js"></script> <!-- form.js handles Firebase initialization and logout -->
 
     <style>
@@ -129,6 +130,12 @@
                         
                         <label for="price-${itemId}">Starting Price:</label>
                         <input type="number" id="price-${itemId}" value="${item.price}">
+
+                        <label>Current Image:</label>
+                        <img src="${item.imageUrl || '#'}" alt="Item Image" style="width: 100%; max-width: 200px; height: auto; margin-bottom: 10px;">
+                        
+                        <label for="image-${itemId}">Change Image:</label>
+                        <input type="file" id="image-${itemId}" accept="image/*">
                         
                         <label for="endTime-${itemId}">Auction End Time:</label>
                         <input type="datetime-local" id="endTime-${itemId}" value="${new Date(item.endTime).toISOString().slice(0, 16)}">
@@ -144,22 +151,47 @@
             });
         }
 
-        // Function to edit an item
-        function editItem(userId, itemId) {
+        // Function to edit an item, including image upload
+        async function editItem(userId, itemId) {
             const name = document.getElementById(`name-${itemId}`).value;
             const description = document.getElementById(`description-${itemId}`).value;
             const price = parseFloat(document.getElementById(`price-${itemId}`).value);
             const endTime = new Date(document.getElementById(`endTime-${itemId}`).value).getTime();
+            const imageFile = document.getElementById(`image-${itemId}`).files[0];
 
+            // Reference to the item in the database
             const itemRef = db.ref(`onlineAuction/users/${userId}/auction-items/${itemId}`);
-            itemRef.update({
-                name: name,
-                description: description,
-                price: price,
-                endTime: endTime
-            })
-            .then(() => alert("Item updated successfully!"))
-            .catch((error) => alert("Error updating item: " + error.message));
+
+            // If a new image is selected, upload it
+            if (imageFile) {
+                const storageRef = firebase.storage().ref();
+                const imageRef = storageRef.child(`images/${userId}/${itemId}/${imageFile.name}`);
+
+                try {
+                    await imageRef.put(imageFile); // Upload image
+                    const imageUrl = await imageRef.getDownloadURL(); // Get image URL
+                    await itemRef.update({ // Update the item with the new image URL and other fields
+                        name: name,
+                        description: description,
+                        price: price,
+                        endTime: endTime,
+                        imageUrl: imageUrl
+                    });
+                    alert("Item updated successfully with new image!");
+                } catch (error) {
+                    alert("Error updating item with image: " + error.message);
+                }
+            } else {
+                // Update the item without changing the image URL
+                itemRef.update({
+                    name: name,
+                    description: description,
+                    price: price,
+                    endTime: endTime
+                })
+                .then(() => alert("Item updated successfully!"))
+                .catch((error) => alert("Error updating item: " + error.message));
+            }
         }
 
         // Function to delete an item

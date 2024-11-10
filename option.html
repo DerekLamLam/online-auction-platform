@@ -1,10 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Options - Auction Platform</title>
+
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
 
-// Firebase configuration
-// Your web app's Firebase configuration
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        
+        .button-container {
+            margin-top: 50px;
+        }
+
+        .button-container button {
+            padding: 15px 30px;     /* Larger padding for bigger buttons */
+            font-size: 18px;         /* Larger font size */
+            min-width: 150px;        /* Consistent width for all buttons */
+            margin: 10px;            /* Space between buttons */
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button-container button:hover {
+            background-color: #45a049;  /* Slightly darker color on hover */
+        }
+
+        .logout-container {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .logout-container button {
+            padding: 10px 20px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .logout-container button:hover {
+            background-color: #e53935;
+        }
+    </style>
+</head>
+<body>
+    <div class="logout-container">
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <h2>Welcome to the Auction Platform!</h2>
+    <p>Choose an option below to manage your auction items:</p>
+
+    <div class="button-container">
+        <button onclick="window.location.href='upload.html'">Upload New Item</button>
+        <button onclick="window.location.href='edit.html'">Edit Item</button>
+        <button onclick="window.location.href='home.html'">Home page</button>
+    </div>
+
+    <script>
+        // Firebase configuration
+       
     const firebaseConfig = {
     apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
     authDomain: "onlineauction-ba60b.firebaseapp.com",
@@ -15,12 +84,28 @@
     appId: "1:313811380253:web:e80553266413d869dafef4"
     };
 
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
 
-<div class="button-container">
-    <button onclick="window.location.href='upload.html'">Upload New Item</button>
-    <br>
-    <button onclick="window.location.href='edit.html'">Edit Item</button>
-    <br>
-    <button onclick="window.location.href='home.html'">Home page</button>
-    <br>
-</div>
+        // Redirect to login page if user is not logged in
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                alert("You must be logged in to view this page.");
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Logout function
+        function logout() {
+            auth.signOut().then(() => {
+                alert("You have been logged out successfully.");
+                window.location.href = 'index.html';
+            }).catch((error) => {
+                console.error("Error logging out:", error);
+                alert("An error occurred while logging out. Please try again.");
+            });
+        }
+    </script>
+</body>
+</html>

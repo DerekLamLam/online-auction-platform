@@ -56,13 +56,24 @@
     <script>
          // Ensure the user is authenticated
         checkUserAuthentication();
+
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // Update the welcome message with the user's name
-                document.getElementById('welcomeMessage').innerText = `Welcome to ${user.displayName}`;
-                
-                // Load the user's auction items
-                loadUserItems(user.uid);
+                // Retrieve user's data from the Firebase Realtime Database
+                const userId = user.uid;  // Get the user ID
+                firebase.database().ref('users/' + userId).once('value')
+                    .then((snapshot) => {
+                        const username = snapshot.val().username; // Get the username
+                        if (username) {
+                            document.getElementById('welcomeMessage').innerText = `Welcome to ${username}`;
+                        } else {
+                            document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
+                        }
+                        loadUserItems(userId);  // Load user's auction items
+                    })
+                    .catch((error) => {
+                        console.error("Error fetching user information:", error);
+                    });
             }
         });
 

@@ -56,10 +56,13 @@
     <script>
 // Ensure the user is authenticated
 checkUserAuthentication();
-
+        
 auth.onAuthStateChanged((user) => {
     if (user) {
         const userId = user.uid;
+
+        // Log to verify the userId is correct
+        console.log("User ID:", userId);
 
         // Reference to the user data in Firebase
         const userRef = firebase.database().ref('users/' + userId);

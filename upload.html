@@ -20,7 +20,8 @@
         <div class="logout-container">
             <button onclick="logout()">Logout</button>
         </div>
-        
+        <h1 id="welcomeMessage">Welcome to </h1>
+
         <h2>Upload Auction Item</h2>
         <form id="uploadForm" onsubmit="uploadItem(event)">
             <label for="itemName">Item Name:</label>
@@ -55,6 +56,16 @@
     <script>
          // Ensure the user is authenticated
         checkUserAuthentication();
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Update the welcome message with the user's name
+                document.getElementById('welcomeMessage').innerText = `Welcome to ${user.displayName}`;
+                
+                // Load the user's auction items
+                loadUserItems(user.uid);
+            }
+        });
+
         async function uploadItem(event) {
             event.preventDefault();
 

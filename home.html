@@ -14,7 +14,10 @@
     <script src="server.js" defer></script>
 
     <style>
-        /* Your styles here */
+        /* Example styles */
+        .auction-item {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -26,10 +29,10 @@
     <div id="allAuctionItems"></div> <!-- Auction items will be displayed here -->
 
     <script>
-        // Call the fetchAllAuctionItems function when the page loads
+        // Ensure user is authenticated and then fetch auction items
         document.addEventListener('DOMContentLoaded', () => {
-            checkUserAuthentication();
-            fetchAllAuctionItems(); // Call function from server.js to display auction items
+            checkUserAuthentication(); // Check if user is logged in
+            fetchAllAuctionItems(); // Call function to display auction items
         });
     </script>
 </body>

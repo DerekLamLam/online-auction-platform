@@ -147,7 +147,7 @@ function logout() {
             alert("An error occurred while logging out. Please try again.");
         });
 }
-// Check if user is authenticated (  edit.html)
+// Check if user is authenticated 
 function checkUserAuthentication(redirectUrl = "index.html") {
     auth.onAuthStateChanged((user) => {
         if (!user) {
@@ -159,7 +159,7 @@ function checkUserAuthentication(redirectUrl = "index.html") {
 
 // Example: Usage of checkUserAuthentication for pages requiring login
 document.addEventListener("DOMContentLoaded", () => {
-    checkUserAuthentication(); // This will ensure the user is logged in when accessing edit.html
+    checkUserAuthentication(); 
 });
 
 

@@ -57,25 +57,37 @@
          // Ensure the user is authenticated
         checkUserAuthentication();
 
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // Retrieve user's data from the Firebase Realtime Database
-                const userId = user.uid;  // Get the user ID
-                firebase.database().ref('users/' + userId).once('value')
-                    .then((snapshot) => {
-                        const username = snapshot.val().username; // Get the username
-                        if (username) {
-                            document.getElementById('welcomeMessage').innerText = `Welcome to ${username}`;
-                        } else {
-                            document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
-                        }
-                        loadUserItems(userId);  // Load user's auction items
-                    })
-                    .catch((error) => {
-                        console.error("Error fetching user information:", error);
-                    });
-            }
-        });
+    auth.onAuthStateChanged((user) => {
+    if (user) {
+        const userId = user.uid;  // Get the user ID
+
+        // Retrieve the user's data from Firebase Realtime Database
+        firebase.database().ref('users/' + userId).once('value')
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    const username = userData.username;
+
+                    if (username) {
+                        // If username is found, set the welcome message
+                        document.getElementById('welcomeMessage').innerText = `Welcome to ${username}`;
+                    } else {
+                        console.error("Username is not available in database for userId:", userId);
+                        document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
+                    }
+                } else {
+                    console.error("No data found for userId:", userId);
+                    document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
+                }
+
+                loadUserItems(userId);  // Load user's auction items (already in your script)
+            })
+            .catch((error) => {
+                console.error("Error fetching user information from the database:", error);
+                document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
+            });
+    }
+});
 
         async function uploadItem(event) {
             event.preventDefault();

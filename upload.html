@@ -56,7 +56,6 @@
     <script>
 // Ensure the user is authenticated
 checkUserAuthentication();
-        
 auth.onAuthStateChanged((user) => {
     if (user) {
         const userId = user.uid;
@@ -70,18 +69,15 @@ auth.onAuthStateChanged((user) => {
         // Fetch the user's data
         userRef.once('value')
             .then((snapshot) => {
-                console.log("Snapshot content:", snapshot.val()); // Log entire snapshot content
-                
                 if (snapshot.exists()) {
+                    console.log("Snapshot content:", snapshot.val()); // Log entire snapshot content
+
                     const userData = snapshot.val();
-                    console.log("User Data Retrieved:", userData); // Log entire user data
 
                     // Extract the username from the retrieved user data
-                    const username = userData.username;
-
-                    if (username) {
-                        console.log("Username retrieved successfully:", username);
-                        document.getElementById('welcomeMessage').innerText = `Welcome to ${username}`;
+                    if (userData.username) {
+                        console.log("Username retrieved successfully:", userData.username);
+                        document.getElementById('welcomeMessage').innerText = `Welcome to ${userData.username}`;
                     } else {
                         console.error("Username field is missing in the database for userId:", userId);
                         document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;

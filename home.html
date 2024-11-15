@@ -9,7 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
-
+    <script src="form.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -71,102 +71,16 @@
     <div id="allAuctionItems"></div>
 
     <script>
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
-            authDomain: "onlineauction-ba60b.firebaseapp.com",
-            databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
-            projectId: "onlineauction-ba60b",
-            storageBucket: "onlineauction-ba60b.appspot.com",
-            messagingSenderId: "313811380253",
-            appId: "1:313811380253:web:e80553266413d869dafef4"
-        };
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
 
-        // Function to calculate remaining time in "Xd Xh Xm" format
-        function calculateRemainingTime(endTime) {
-            const now = Date.now();
-            const timeDiff = endTime - now;
+    // Function to calculate remaining time in "Xd Xh Xm" format
+  calculateRemainingTime(endTime);
 
-            if (timeDiff <= 0) {
-                return "Auction ended";
-            }
-
-            const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-
-            if (days > 0) {
-                return `${days}d ${hours}h ${minutes}m`;
-            } else if (hours > 0) {
-                return `${hours}h ${minutes}m`;
-            } else {
-                return `${minutes}m`;
-            }
-        }
-
-        // Function to fetch and display all auction items
-        function fetchAllAuctionItems() {
-            const usersRef = db.ref('onlineAuction/users');
-            usersRef.on('value', (snapshot) => {
-                const allAuctionItemsContainer = document.getElementById('allAuctionItems');
-                allAuctionItemsContainer.innerHTML = ''; // Clear existing items
-
-                snapshot.forEach((userSnapshot) => {
-                    const sellerData = userSnapshot.val();
-                    userSnapshot.child('auction-items').forEach((itemSnapshot) => {
-                        const itemData = itemSnapshot.val();
-                        const itemID = itemSnapshot.key;
-                        const userUID = userSnapshot.key;
-
-                        // Handle highestBid being null
-                        const currentHighestBid = itemData.highestBid || itemData.price;
-                        let highestBidderName = "No bids yet";
-
-                        if (itemData.highestBidder) {
-                            db.ref(`onlineAuction/users/${itemData.highestBidder}/username`).once('value')
-                                .then((bidderSnapshot) => {
-                                    highestBidderName = bidderSnapshot.val() || itemData.highestBidder;
-                                    document.getElementById(`highestBidder-${itemID}`).innerText = highestBidderName;
-                                });
-                        }
-
-                        const remainingTime = calculateRemainingTime(itemData.endTime);
-
-                        const itemElement = document.createElement('div');
-                        itemElement.classList.add('auction-item');
-                        itemElement.innerHTML = `
-                            <h3>${itemData.name}</h3>
-                            <p>Description: ${itemData.description}</p>
-                            <p>Starting Price: $${itemData.price}</p>
-                            <p>Current Highest Bid: $${currentHighestBid}</p>
-                            <p>Highest Bidder: <span id="highestBidder-${itemID}">${highestBidderName}</span></p>
-                            <p>Remaining Time: <span id="timer-${itemID}">${remainingTime}</span></p>
-                            <p>Seller: ${sellerData.username || 'Unknown'} (${sellerData.email || 'No email provided'})</p>
-                            <img src="${itemData.imageUrl || ''}" alt="${itemData.name}">
-                            <form onsubmit="placeBid(event, '${userUID}', '${itemID}', ${currentHighestBid})">
-                                <input type="number" id="bidAmount-${itemID}" placeholder="Enter bid amount" min="${currentHighestBid + 1}" required>
-                                <button type="submit">Place Bid</button>
-                            </form>
-                            <hr>
-                        `;
-                        allAuctionItemsContainer.appendChild(itemElement);
-
-                        // Update timer every minute
-                        setInterval(() => {
-                            document.getElementById(`timer-${itemID}`).innerText = calculateRemainingTime(itemData.endTime);
-                        }, 60000);
-                    });
-                });
-            });
-        }
-
-        // Load all auction items on page load
-        document.addEventListener('DOMContentLoaded', () => {
+    // Function to fetch and display all auction items
+  fetchAllAuctionItems();
+            
+     // Load all auction items on page load
+      document.addEventListener('DOMContentLoaded', () => {
             auth.onAuthStateChanged((user) => {
                 if (user) {
                     fetchAllAuctionItems();
@@ -176,52 +90,11 @@
                 }
             });
         });
-
         // Function to logout
-        function logout() {
-            auth.signOut().then(() => {
-                alert("You have been logged out successfully.");
-                window.location.href = 'index.html';
-            }).catch((error) => {
-                console.error("Error logging out:", error);
-                alert("An error occurred while logging out. Please try again.");
-            });
-        }
+    logout() ;
 
-        // Function to place a bid with error handling
-        async function placeBid(event, userUID, itemID, currentHighestBid) {
-            event.preventDefault();
-            const bidInput = document.getElementById(`bidAmount-${itemID}`);
-            const bidAmount = parseFloat(bidInput.value);
-
-            if (isNaN(bidAmount) || bidAmount <= currentHighestBid) {
-                alert("Your bid must be higher than the current highest bid.");
-                return;
-            }
-
-            const user = auth.currentUser;
-            if (!user) {
-                alert("You need to log in to place a bid.");
-                return;
-            }
-
-            try {
-                // Reference to the specific auction item in Firebase
-                const itemRef = db.ref(`onlineAuction/users/${userUID}/auction-items/${itemID}`);
-
-                // Update Firebase with the new highest bid and bidder
-                await itemRef.update({
-                    highestBid: bidAmount,
-                    highestBidder: user.uid
-                });
-
-                alert("Bid placed successfully!");
-                fetchAllAuctionItems(); // Refresh items to show updated bid
-            } catch (error) {
-                console.error("Error placing bid:", error);
-                alert("An error occurred while placing your bid. Please try again.");
-            }
-        }
+     placeBid(event, userUID, itemID, currentHighestBid);
+      
     </script>
 </body>
 </html>

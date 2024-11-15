@@ -81,8 +81,7 @@ auth.onAuthStateChanged((user) => {
                     document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
                 }
 
-                // Load user's auction items (assuming you already have this function)
-                loadUserItems(userId);
+                loadUserItems(userId);  // Load user's auction items (already in your script)
             })
             .catch((error) => {
                 console.error("Error fetching user information from the database:", error);

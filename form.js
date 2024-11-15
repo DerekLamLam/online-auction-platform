@@ -42,7 +42,6 @@ function calculateRemainingTime(endTime) {
         return `${minutes}m`;
     }
 }
-
 // Function to fetch and display all auction items with seller info, item images, and timer
 async function fetchAllAuctionItems() {
     const usersRef = db.ref('onlineAuction/users');
@@ -71,6 +70,10 @@ async function fetchAllAuctionItems() {
                 // Calculate remaining time
                 const remainingTime = calculateRemainingTime(itemData.endTime);
 
+                // Determine if auction has ended
+                const now = Date.now();
+                const isAuctionEnded = now >= itemData.endTime;
+
                 const itemElement = document.createElement('div');
                 itemElement.classList.add('auction-item');
                 itemElement.innerHTML = `
@@ -83,9 +86,10 @@ async function fetchAllAuctionItems() {
                     <p>Seller: ${sellerData.username || 'Unknown'} (${sellerData.email || 'No email provided'})</p>
                     <img src="${itemData.imageUrl || ''}" alt="${itemData.name}" style="max-width: 200px;">
                     <form onsubmit="placeBid(event, '${userUID}', '${itemID}', ${currentHighestBid}, ${itemData.endTime})">
-                        <input type="number" id="bidAmount-${itemID}" placeholder="Enter bid amount" min="${currentHighestBid + 1}" required>
-                        <button type="submit">Place Bid</button>
+                        <input type="number" id="bidAmount-${itemID}" placeholder="Enter bid amount" min="${currentHighestBid + 1}" required ${isAuctionEnded ? 'disabled' : ''}>
+                        <button type="submit" ${isAuctionEnded ? 'disabled' : ''}>Place Bid</button>
                     </form>
+                    ${isAuctionEnded ? '<p>This auction has ended. You cannot place any bids.</p>' : ''}
                     <hr>
                 `;
                 allAuctionItemsContainer.appendChild(itemElement);
@@ -100,7 +104,6 @@ async function fetchAllAuctionItems() {
 }
 
 
-// Function to place a bid with error handling
 async function placeBid(event, userUID, itemID, currentHighestBid, endTime) {
     event.preventDefault();
 

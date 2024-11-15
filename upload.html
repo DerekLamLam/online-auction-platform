@@ -64,28 +64,40 @@ auth.onAuthStateChanged((user) => {
         // Log to verify the userId is correct
         console.log("User ID:", userId);
 
-        // Reference to the user data in Firebase
-        const userRef = firebase.database().ref('users/' + userId);
+        // Corrected path to the user data in Firebase
+        const userRef = firebase.database().ref('onlineAuction/users/' + userId);
 
-        // Fetch the user's username
-        userRef.child('username').once('value').then((snapshot) => {
-            if (snapshot.exists()) {
-                const username = snapshot.val();
-                console.log("Retrieved Username:", username); // Log to check the correct username is retrieved
-                // Update the welcome message
-                document.getElementById('welcomeMessage').innerText = `Welcome to ${username}`;
-            } else {
-                console.error("Username not found for userId:", userId);
-                // Fallback in case username is missing
+        // Fetch the user's data
+        userRef.once('value')
+            .then((snapshot) => {
+                console.log("Snapshot content:", snapshot.val()); // Log entire snapshot content
+                
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    console.log("User Data Retrieved:", userData); // Log entire user data
+
+                    // Extract the username from the retrieved user data
+                    const username = userData.username;
+
+                    if (username) {
+                        console.log("Username retrieved successfully:", username);
+                        document.getElementById('welcomeMessage').innerText = `Welcome to ${username}`;
+                    } else {
+                        console.error("Username field is missing in the database for userId:", userId);
+                        document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
+                    }
+                } else {
+                    console.error("No user data found for userId:", userId);
+                    document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching user data from Firebase:", error);
                 document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
-            }
-        }).catch((error) => {
-            console.error("Error fetching username from Firebase:", error);
-            // Fallback if there's an error
-            document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
-        });
+            });
     }
 });
+
 
         async function uploadItem(event) {
             event.preventDefault();

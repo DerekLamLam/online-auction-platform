@@ -57,7 +57,7 @@
          // Ensure the user is authenticated
         checkUserAuthentication();
 
-    auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged((userid) => {
     if (user) {
         const userId = user.uid;  // Get the user ID
 
@@ -85,7 +85,7 @@
             .catch((error) => {
                 console.error("Error fetching user information from the database:", error);
                 document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
-            });
+            }); 
     }
 });
 

@@ -20,7 +20,7 @@
         <div class="logout-container">
             <button onclick="logout()">Logout</button>
         </div>
-        <h1 id="welcomeMessage">Welcome to </h1>
+        <h1 id="welcomeMessage">Welcome  </h1>
 
         <h2>Upload Auction Item</h2>
         <form id="uploadForm" onsubmit="uploadItem(event)">
@@ -69,7 +69,7 @@ auth.onAuthStateChanged((user) => {
         })
         .catch(error => {
             console.error("Error fetching user data:", error);
-            document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
+            document.getElementById('welcomeMessage').innerText = `Welcome  ${user.email.split('@')[0]}`;
         });
 });
 

@@ -25,8 +25,8 @@
         <h2>Edit Your Auction Items</h2>
         <div id="itemList"></div>
     </div>
-
-                // Function to load user's auction items
+  <script>
+    // Function to load user's auction items
         function loadUserItems(userId) {
             const userItemsRef = db.ref(`onlineAuction/users/${userId}/auction-items`);
             userItemsRef.on('value', (snapshot) => {

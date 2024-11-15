@@ -57,39 +57,44 @@
          // Ensure the user is authenticated
         checkUserAuthentication();
 
- // Handle user authentication state changes
 auth.onAuthStateChanged((user) => {
     if (user) {
         const userId = user.uid;  // Get the logged-in user's ID
+
+        // Log to verify the userId is correct
+        console.log("User ID:", userId);
 
         // Retrieve the user's data from Firebase Realtime Database
         firebase.database().ref('users/' + userId).once('value')
             .then((snapshot) => {
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
-                    const username = userData.username;  // Get the username from the database
+                    console.log("User data retrieved from Firebase:", userData); // Debugging log
 
-                    if (username) {
-                        // Display the welcome message with the username
-                        document.getElementById('welcomeMessage').innerText = `Welcome to ${username}`;
+                    // Check if 'username' exists and log it
+                    if (userData.username) {
+                        console.log("Username found:", userData.username);
+                        document.getElementById('welcomeMessage').innerText = `Welcome to ${userData.username}`;
                     } else {
                         console.error("Username is not available in the database for userId:", userId);
                         document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
                     }
                 } else {
+                    // No data found for this user
                     console.error("No data found for userId:", userId);
                     document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
                 }
 
-                loadUserItems(userId);  // Load user's auction items (already in your script)
+                // Load the user's auction items
+                loadUserItems(userId);
             })
             .catch((error) => {
+                // Handle any errors in the Firebase retrieval
                 console.error("Error fetching user information from the database:", error);
                 document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
             });
     }
 });
-
 
 
         async function uploadItem(event) {

@@ -82,7 +82,7 @@ async function fetchAllAuctionItems() {
                     <p>Remaining Time: <span id="timer-${itemID}">${remainingTime}</span></p>
                     <p>Seller: ${sellerData.username || 'Unknown'} (${sellerData.email || 'No email provided'})</p>
                     <img src="${itemData.imageUrl || ''}" alt="${itemData.name}" style="max-width: 200px;">
-                    <form onsubmit="placeBid(event, '${userUID}', '${itemID}', ${currentHighestBid})">
+                    <form onsubmit="placeBid(event, '${userUID}', '${itemID}', ${currentHighestBid}, ${itemData.endTime})">
                         <input type="number" id="bidAmount-${itemID}" placeholder="Enter bid amount" min="${currentHighestBid + 1}" required>
                         <button type="submit">Place Bid</button>
                     </form>
@@ -99,8 +99,9 @@ async function fetchAllAuctionItems() {
     });
 }
 
+
 // Function to place a bid with error handling
-async function placeBid(event, userUID, itemID, currentHighestBid) {
+async function placeBid(event, userUID, itemID, currentHighestBid, endTime) {
     event.preventDefault();
 
     const bidInput = document.getElementById(`bidAmount-${itemID}`);
@@ -109,6 +110,13 @@ async function placeBid(event, userUID, itemID, currentHighestBid) {
     console.log("Attempting to place bid", { userUID, itemID, bidAmount, currentHighestBid });
 
     try {
+        // Check if the auction has ended
+        const now = Date.now();
+        if (now >= endTime) {
+            alert("This auction has ended. You can no longer place a bid.");
+            return;
+        }
+
         if (bidAmount <= currentHighestBid) {
             alert("Your bid must be higher than the current highest bid.");
             return;
@@ -136,6 +144,7 @@ async function placeBid(event, userUID, itemID, currentHighestBid) {
         alert("An error occurred while placing your bid. Please try again.");
     }
 }
+
 
 // Logout Function
 function logout() {

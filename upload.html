@@ -59,40 +59,43 @@
 
 auth.onAuthStateChanged((user) => {
     if (user) {
-        const userId = user.uid;  // Get the logged-in user's ID
+        const userId = user.uid;
 
-        // Log to verify the userId is correct
+        // Print user ID to ensure it's correct
         console.log("User ID:", userId);
 
-        // Retrieve the user's data from Firebase Realtime Database
-        firebase.database().ref('users/' + userId).once('value')
-            .then((snapshot) => {
-                if (snapshot.exists()) {
-                    const userData = snapshot.val();
-                    console.log("User data retrieved from Firebase:", userData); // Debugging log
+        // Reference to the user data in Firebase
+        const userRef = firebase.database().ref('users/' + userId);
 
-                    // Check if 'username' exists and log it
-                    if (userData.username) {
-                        console.log("Username found:", userData.username);
-                        document.getElementById('welcomeMessage').innerText = `Welcome to ${userData.username}`;
-                    } else {
-                        console.error("Username is not available in the database for userId:", userId);
-                        document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
-                    }
+        // Fetch the user data
+        userRef.once('value').then((snapshot) => {
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                
+                // Log the entire userData to verify
+                console.log("User data from Firebase:", userData);
+
+                // Fetch the username
+                const username = userData.username;
+
+                // Ensure we log the retrieved username
+                console.log("Username retrieved:", username);
+
+                // Update the welcome message if username is valid
+                if (username) {
+                    document.getElementById('welcomeMessage').innerText = `Welcome to ${username}`;
                 } else {
-                    // No data found for this user
-                    console.error("No data found for userId:", userId);
+                    console.error("Username is missing for userId:", userId);
                     document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
                 }
-
-                // Load the user's auction items
-                loadUserItems(userId);
-            })
-            .catch((error) => {
-                // Handle any errors in the Firebase retrieval
-                console.error("Error fetching user information from the database:", error);
+            } else {
+                console.error("No data found for userId:", userId);
                 document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
-            });
+            }
+        }).catch((error) => {
+            console.error("Error fetching user information from Firebase:", error);
+            document.getElementById('welcomeMessage').innerText = `Welcome to ${user.email.split('@')[0]}`;
+        });
     }
 });
 

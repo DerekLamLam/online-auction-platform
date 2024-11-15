@@ -70,29 +70,124 @@
 <body>
     <div class="main">
         <h1>Register Page</h1> 
+<style>
+    /* General reset and consistency */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f7fc; /* Light background */
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Ensure the container layout is consistent */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Header */
+.header {
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.header h1 {
+  font-size: 2rem;
+}
+
+/* Register Form Styling */
+.register-container {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  margin-top: 50px;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.register-container h2 {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Form Fields */
+.register-form input,
+.register-form button {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+/* Focus effect on input */
+.register-form input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Button styling */
+.register-form button {
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.register-form button:hover {
+  background-color: #0056b3;
+}
+
+/* Adjust layout for mobile responsiveness */
+@media (max-width: 768px) {
+  .register-container {
+    padding: 15px;
+  }
+
+  .register-form input,
+  .register-form button {
+    padding: 10px;
+  }
+}
+</style>
         <form id="registerForm">
             <label for="username">Username:</label>
-            <input type="text" id="username" name="username" placeholder="Enter your Username" required><br><br>
+            <input type="text" id="username" name="username" placeholder="Enter your Username" required>
 
             <label for="hkid">HKID Number:</label>
-            <input type="text" id="hkid" name="hkid" placeholder="Enter your HKID number" required><br><br>
+            <input type="text" id="hkid" name="hkid" placeholder="Enter your HKID number" required>
 
             <label for="fullname">Fullname:</label>
-            <input type="text" id="fullname" name="fullname" placeholder="Enter your Fullname" required><br><br>
+            <input type="text" id="fullname" name="fullname" placeholder="Enter your Fullname" required>
 
             <label for="phonenum">Phone Number:</label>
-            <input type="tel" id="phonenum" name="phonenum" placeholder="Enter your Phone number" required><br><br>
+            <input type="tel" id="phonenum" name="phonenum" placeholder="Enter your Phone number" required>
 
             <label for="Address">Address:</label>
-            <input type="text" id="Address" name="Address" placeholder="Enter your Address" required><br><br>
+            <input type="text" id="Address" name="Address" placeholder="Enter your Address" required>
 
             <label for="Email">Email:</label>
-            <input type="email" id="Email" name="Email" placeholder="Enter your Email" required><br><br>
+            <input type="email" id="Email" name="Email" placeholder="Enter your Email" required>
 
             <label for="password">Password:</label>
-            <input type="text" id="password" name="password" placeholder="Enter your Password" required><br><br>
+            <input type="text" id="password" name="password" placeholder="Enter your Password" required>
 
-            <button type="submit" class="registerbtn">Register</button><br><br>
+            <button type="submit">Register</button>
         </form>
 
         <p>Already have an account? <a href="index.html">Sign in</a>.</p>

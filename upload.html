@@ -53,26 +53,8 @@
         <div id="itemList"></div>
     </div>
     <script>
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
-            authDomain: "onlineauction-ba60b.firebaseapp.com",
-            databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
-            projectId: "onlineauction-ba60b",
-            storageBucket: "onlineauction-ba60b.appspot.com",
-            messagingSenderId: "313811380253",
-            appId: "1:313811380253:web:e80553266413d869dafef4"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-
-        firebase.auth().onAuthStateChanged((user) => {
-            if (!user) {
-                alert("You must be logged in to upload items.");
-                window.location.href = "index.html";
-            }
-        });
-
+         // Ensure the user is authenticated
+        checkUserAuthentication();
         async function uploadItem(event) {
             event.preventDefault();
 
@@ -127,8 +109,7 @@
                 alert("An error occurred while logging out. Please try again.");
             });
         }
-                // Ensure the user is authenticated
-        checkUserAuthentication();
+           
 
         // Function to load user's auction items
         function loadUserItems(userId) {

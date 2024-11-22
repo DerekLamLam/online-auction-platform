@@ -3,32 +3,72 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" 
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChatBot</title>
     <link rel="stylesheet" href="style.css">
+    <script src="form.js" defer></script> <!-- Link to form.js -->
 </head>
 
 <body>
     <div class="chatBot">
         <header>
             <h2>ChatBot</h2>
-            <span alt="Close" 
-                  id="cross" 
-                  onclick="cancel()">X</span>
+            <span id="cross" onclick="cancel()">X</span>
         </header>
-        <ul class="chatbox">
+        <ul class="chatbox" id="chatbox">
             <li class="chat-incoming chat">
                 <p>Hey! How can I assist you today?</p>
             </li>
         </ul>
         <div class="chat-input">
-            <textarea rows="0" cols="17"
-                      placeholder="Enter a message..."></textarea>
-            <button id="sendBTN">Send</button>
+            <textarea id="userMessage" rows="1" placeholder="Enter a message..."></textarea>
+            <button id="sendBTN" onclick="sendMessage()">Send</button>
         </div>
     </div>
-    <script src="script.js" defer></script>
+
+    <script>
+        async function sendMessage() {
+            const userMessage = document.getElementById('userMessage').value.trim();
+            if (!userMessage) return;
+
+            const chatbox = document.getElementById('chatbox');
+
+            // Display user message
+            const userMessageElement = document.createElement('li');
+            userMessageElement.className = 'chat-outgoing chat';
+            userMessageElement.innerHTML = `<p>${userMessage}</p>`;
+            chatbox.appendChild(userMessageElement);
+
+            // Clear input field
+            document.getElementById('userMessage').value = '';
+
+            try {
+                // Call the server logic defined in form.js
+                const botReply = await getBotReply(userMessage);
+
+                // Display bot response
+                const botMessageElement = document.createElement('li');
+                botMessageElement.className = 'chat-incoming chat';
+                botMessageElement.innerHTML = `<p>${botReply}</p>`;
+                chatbox.appendChild(botMessageElement);
+            } catch (error) {
+                // Handle errors
+                const errorMessageElement = document.createElement('li');
+                errorMessageElement.className = 'chat-incoming chat';
+                errorMessageElement.innerHTML = `<p>Sorry, something went wrong. Please try again later.</p>`;
+                chatbox.appendChild(errorMessageElement);
+                console.error('Error:', error);
+            }
+
+            // Scroll to the bottom of the chatbox
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        function cancel() {
+            // Close the chatbot or perform any necessary cleanup
+            document.querySelector('.chatBot').style.display = 'none';
+        }
+    </script>
 </body>
 
 </html>

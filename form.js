@@ -168,6 +168,19 @@ function checkUserAuthentication(redirectUrl = "index.html") {
         }
     });
 }
+// form.js
+
+// Mock function to simulate a chatbot response
+async function getBotReply(userMessage) {
+    // Replace with actual logic if connecting to Firebase or another backend
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (!userMessage) reject('Invalid input');
+            const reply = `You said: ${userMessage}. How can I assist further?`;
+            resolve(reply);
+        }, 1000); // Simulate a delay
+    });
+}
 
 // Example: Usage of checkUserAuthentication for pages requiring login
 document.addEventListener("DOMContentLoaded", () => {

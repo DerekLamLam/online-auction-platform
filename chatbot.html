@@ -1,74 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatBot</title>
-    <link rel="stylesheet" href="style.css">
-   
-</head>
-
-<body>
-    <div class="chatBot">
-        <header>
-            <h2>ChatBot</h2>
-            <span id="cross" onclick="cancel()">X</span>
-        </header>
-        <ul class="chatbox" id="chatbox">
-            <li class="chat-incoming chat">
-                <p>Hey! How can I assist you today?</p>
-            </li>
-        </ul>
-        <div class="chat-input">
-            <textarea id="userMessage" rows="1" placeholder="Enter a message..."></textarea>
-            <button id="sendBTN" onclick="sendMessage()">Send</button>
-        </div>
-    </div>
-
+    <title></title> Chatbot</title>
     <script>
-        async function sendMessage() {
-            const userMessage = document.getElementById('userMessage').value.trim();
-            if (!userMessage) return;
+        function chat() {
+            const userInput = document.getElementById('userInput').value;
+            const chatBox = document.getElementById('chatBox');
 
-            const chatbox = document.getElementById('chatbox');
-
-            // Display user message
-            const userMessageElement = document.createElement('li');
-            userMessageElement.className = 'chat-outgoing chat';
-            userMessageElement.innerHTML = `<p>${userMessage}</p>`;
-            chatbox.appendChild(userMessageElement);
-
-            // Clear input field
-            document.getElementById('userMessage').value = '';
-
-            try {
-                // Call the server logic defined in form.js
-                const botReply = await getBotReply(userMessage);
-
-                // Display bot response
-                const botMessageElement = document.createElement('li');
-                botMessageElement.className = 'chat-incoming chat';
-                botMessageElement.innerHTML = `<p>${botReply}</p>`;
-                chatbox.appendChild(botMessageElement);
-            } catch (error) {
-                // Handle errors
-                const errorMessageElement = document.createElement('li');
-                errorMessageElement.className = 'chat-incoming chat';
-                errorMessageElement.innerHTML = `<p>Sorry, something went wrong. Please try again later.</p>`;
-                chatbox.appendChild(errorMessageElement);
-                console.error('Error:', error);
+            if (userInput.trim() !== "") {
+                chatBox.innerHTML += `<p>You: ${userInput}</p>`;
+                chatBox.innerHTML += `<p>Bot: What can I help with "${userInput}"?</p>`;
+                document.getElementById('userInput').value = ""; // Clear input field
+                chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom
             }
-
-            // Scroll to the bottom of the chatbox
-            chatbox.scrollTop = chatbox.scrollHeight;
-        }
-
-        function cancel() {
-            // Close the chatbot or perform any necessary cleanup
-            document.querySelector('.chatBot').style.display = 'none';
         }
     </script>
+</head>
+<body>
+    <h1>Simple Chatbot</h1>
+    <div id="chatBox" style="border: 1px solid black; height: 300px; overflow-y: scroll; padding: 10px;">
+        <p>Bot: What may I help you?</p>
+    </div>
+    <input type="text" id="userInput" placeholder="Type your message here..." />
+    <button onclick="chat()">Send</button>
 </body>
-
 </html>

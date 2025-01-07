@@ -1,23 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title> Online auction platform Chatbot</title>
+    <title>Online Auction Platform Chatbot</title>
     <script>
-        function chat() {
+        const API_URL = "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill"; // Replace with your model URL if different
+        const API_KEY = "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"; // Replace with your API key
+
+        async function chat() {
             const userInput = document.getElementById('userInput').value;
             const chatBox = document.getElementById('chatBox');
 
             if (userInput.trim() !== "") {
+                // Display user input
                 chatBox.innerHTML += `<p>You: ${userInput}</p>`;
-                chatBox.innerHTML += `<p>Bot: What can I help with "${userInput}"?</p>`;
+
+                // Get response from Hugging Face API
+                const botResponse = await getBotResponse(userInput);
+
+                // Display bot response
+                chatBox.innerHTML += `<p>Bot: ${botResponse}</p>`;
                 document.getElementById('userInput').value = ""; // Clear input field
                 chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom
+            }
+        }
+
+        async function getBotResponse(userInput) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${API_KEY}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ inputs: userInput })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.generated_text || "I'm sorry, I couldn't understand that.";
+            } catch (error) {
+                console.error("Error:", error);
+                return "There was an error processing your request. Please try again.";
             }
         }
     </script>
 </head>
 <body>
-    <h1> Chatbot</h1>
+    <h1>Chatbot</h1>
     <div id="chatBox" style="border: 1px solid black; height: 300px; overflow-y: scroll; padding: 10px;">
         <p>Bot: What may I help you?</p>
     </div>

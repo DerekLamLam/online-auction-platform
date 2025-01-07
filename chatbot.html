@@ -3,7 +3,7 @@
 <head>
     <title>Online Auction Platform Chatbot</title>
     <script>
-        const API_URL = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium"; // DialoGPT model
+        const API_URL = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium"; // Use a conversational model
         const API_KEY = "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"; // Replace with your valid Hugging Face API key
 
         async function chat() {
@@ -35,12 +35,21 @@
                     body: JSON.stringify({ inputs: userInput })
                 });
 
+                // Ensure the response is valid
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
 
                 const data = await response.json();
-                return data.generated_text || "I'm sorry, I couldn't understand that.";
+
+                // DialoGPT and some models return `generated_text` in a specific structure
+                if (data && data.conversation && data.conversation.generated_responses) {
+                    return data.conversation.generated_responses[0];
+                } else if (data.generated_text) {
+                    return data.generated_text;
+                } else {
+                    return "Sorry, I couldn't generate a response. Please try again.";
+                }
             } catch (error) {
                 console.error("Error:", error);
                 return "There was an error processing your request. Please try again.";
@@ -50,4 +59,10 @@
 </head>
 <body>
     <h1>Chatbot</h1>
-    <div id="chatBox" style="border
+    <div id="chatBox" style="border: 1px solid black; height: 300px; overflow-y: scroll; padding: 10px;">
+        <p>Bot: What may I help you?</p>
+    </div>
+    <input type="text" id="userInput" placeholder="Type your message here..." />
+    <button onclick="chat()">Send</button>
+</body>
+</html>

@@ -54,10 +54,17 @@
 
     // Function to handle bot responses
     async function handleBotResponse(userMessage) {
-      let botResponse = "Sorry, I didn't understand that. Try asking 'list auctions'.";
+      let botResponse = "Sorry, I didn't understand that. Type 'help' to see available commands.";
 
-      if (userMessage.toLowerCase().includes("list auctions")) {
+      if (userMessage.toLowerCase() === "list auctions") {
         botResponse = await listAvailableItems();
+      } else if (userMessage.toLowerCase().startsWith("search")) {
+        const query = userMessage.substring(7).trim(); // Extract the search term
+        botResponse = await searchAuctionItem(query);
+      } else if (userMessage.toLowerCase() === "help") {
+        botResponse = getHelpMessage();
+      } else if (userMessage.toLowerCase() === "hello" || userMessage.toLowerCase() === "hi") {
+        botResponse = "Hello! How can I assist you today?";
       }
 
       displayMessage(botResponse, 'bot'); // Display bot response
@@ -100,9 +107,52 @@
       }
     }
 
+    // Function to search for a specific auction item by name
+    async function searchAuctionItem(query) {
+      try {
+        if (!query) {
+          return "Please provide an item name to search.";
+        }
+
+        const auctionsRef = db.ref('onlineAuction/users');
+        const snapshot = await auctionsRef.once('value');
+
+        if (!snapshot.exists()) {
+          return "No auction items are currently available.";
+        }
+
+        let foundItem = null;
+        snapshot.forEach(userSnapshot => {
+          const userItems = userSnapshot.child('auction-items').val();
+          if (userItems) {
+            Object.values(userItems).forEach(item => {
+              if (item.name.toLowerCase() === query.toLowerCase()) {
+                foundItem = `- ${item.name}: Current Bid $${item.highestBid}, Ends at ${new Date(item.endTime).toLocaleString()}`;
+              }
+            });
+          }
+        });
+
+        return foundItem || `No items found matching '${query}'.`;
+      } catch (error) {
+        console.error("Error searching auction item:", error);
+        return "Sorry, I couldn't search for the auction item. Please try again later.";
+      }
+    }
+
+    // Function to provide help message
+    function getHelpMessage() {
+      return `
+        Available Commands:
+        - 'list auctions': List all available auction items.
+        - 'search <item name>': Search for a specific auction item by name.
+        - 'hello' or 'hi': Greet the chatbot.
+      `;
+    }
+
     // Welcome message
     window.onload = () => {
-      displayMessage("Welcome to the Auction Chatbot! Type 'list auctions' to see available items.", 'bot');
+      displayMessage("Welcome to the Auction Chatbot! Type 'help' to see available commands.", 'bot');
     };
   </script>
 </body>

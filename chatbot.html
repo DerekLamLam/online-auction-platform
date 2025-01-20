@@ -45,36 +45,35 @@
       const userInput = document.getElementById("user-input").value;
       if (!userInput) return;
 
-      displayMessage(userInput, 'user'); // Display the user message
+      displayMessage(userInput, 'user'); // Display user message
       document.getElementById("user-input").value = ''; // Clear input
-      await handleBotResponse(userInput); // Generate bot response
+      await handleBotResponse(userInput); // Handle bot response
     }
 
     // Function to handle bot responses
     async function handleBotResponse(userMessage) {
       let botResponse = "Sorry, I didn't understand that. Could you rephrase?";
 
-      // Simple bot logic
+      // Sample bot logic
       if (userMessage.toLowerCase().includes("available auctions")) {
-        botResponse = "Here are the available auctions: Item A, Item B, Item C.";
+        botResponse = await getAvailableAuctions();
       } else if (userMessage.toLowerCase().includes("bid")) {
-        botResponse = "Please provide the item name and your bid amount.";
-      } else if (userMessage.toLowerCase().includes("help")) {
-        botResponse = "I can assist with available auctions, placing bids, and general queries.";
+        botResponse = "Please provide the item name and your bid amount (e.g., 'Bid chair 100').";
+      } else if (userMessage.toLowerCase().startsWith("bid")) {
+        const bidDetails = userMessage.split(" ");
+        if (bidDetails.length === 3) {
+          const itemName = bidDetails[1];
+          const bidAmount = parseInt(bidDetails[2]);
+          botResponse = await placeBid(itemName, bidAmount);
+        } else {
+          botResponse = "Invalid format. Use: 'Bid itemName amount'.";
+        }
       }
-
-      // Save bot response to Firebase
-      const botMessageRef = database.ref('chatbot/messages').push();
-      await botMessageRef.set({
-        sender: 'bot',
-        message: botResponse,
-        timestamp: Date.now()
-      });
 
       displayMessage(botResponse, 'bot'); // Display bot response
     }
 
-    // Function to display a message in the chat box
+    // Function to display a message
     function displayMessage(message, sender) {
       const chatBox = document.getElementById("chat-box");
       const messageDiv = document.createElement("div");
@@ -84,7 +83,55 @@
       chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
     }
 
-    // Display a welcome message when the page loads
+    // Function to get available auctions
+    async function getAvailableAuctions() {
+      const auctionsRef = database.ref('onlineAuction/users');
+      const snapshot = await auctionsRef.once('value');
+      const data = snapshot.val();
+
+      let auctionList = "Available Auctions:\n";
+      for (const userId in data) {
+        if (data[userId].auction-items) {
+          const items = data[userId]['auction-items'];
+          for (const itemId in items) {
+            const item = items[itemId];
+            auctionList += `- ${item.name}: Starting at ${item.price}\n`;
+          }
+        }
+      }
+      return auctionList.trim() || "No auctions available.";
+    }
+
+    // Function to place a bid
+    async function placeBid(itemName, bidAmount) {
+      const auctionsRef = database.ref('onlineAuction/users');
+      const snapshot = await auctionsRef.once('value');
+      const data = snapshot.val();
+
+      for (const userId in data) {
+        if (data[userId]['auction-items']) {
+          const items = data[userId]['auction-items'];
+          for (const itemId in items) {
+            const item = items[itemId];
+            if (item.name.toLowerCase() === itemName.toLowerCase()) {
+              if (bidAmount > item.highestBid) {
+                // Update highest bid
+                await database.ref(`onlineAuction/users/${userId}/auction-items/${itemId}`).update({
+                  highestBid: bidAmount,
+                  highestBidder: "YourUserID" // Replace with actual user ID
+                });
+                return `Your bid of ${bidAmount} for ${item.name} has been placed successfully.`;
+              } else {
+                return `Your bid must be higher than the current highest bid (${item.highestBid}).`;
+              }
+            }
+          }
+        }
+      }
+      return `Item '${itemName}' not found in auctions.`;
+    }
+
+    // Display a welcome message on page load
     window.onload = function() {
       displayMessage("Welcome to the Online Auction! How may I assist you?", 'bot');
     };

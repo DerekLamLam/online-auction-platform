@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Online Auction Chatbot</title>
+  <title>Chatbot</title>
   <style>
     body { font-family: Arial, sans-serif; }
     #chat-box { width: 300px; height: 400px; border: 1px solid #ccc; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
@@ -20,9 +20,10 @@
   <input type="text" id="user-input" placeholder="Ask something..." />
   <button onclick="sendMessage()">Send</button>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
 
   <script>
     // Firebase configuration
@@ -38,7 +39,8 @@
 
     // Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
-    const database = firebase.database(app);
+    const auth = firebase.auth();
+    const db = firebase.database();
 
     // Function to send user messages
     async function sendMessage() {
@@ -54,17 +56,25 @@
     async function handleBotResponse(userMessage) {
       let botResponse = "Sorry, I didn't understand that. Could you rephrase?";
 
-      // Sample bot logic
-      if (userMessage.toLowerCase().includes("available auctions")) {
-        botResponse = await getAvailableAuctions();
+      // Authentication check
+      const user = auth.currentUser;
+      if (!user) {
+        botResponse = "Please log in to use the chatbot features.";
+        displayMessage(botResponse, 'bot');
+        return;
+      }
+
+      const userId = user.uid;
+
+      // Bot logic
+      if (userMessage.toLowerCase().includes("my auctions")) {
+        botResponse = await getUserAuctions(userId);
       } else if (userMessage.toLowerCase().includes("bid")) {
-        botResponse = "Please provide the item name and your bid amount (e.g., 'Bid chair 100').";
-      } else if (userMessage.toLowerCase().startsWith("bid")) {
         const bidDetails = userMessage.split(" ");
         if (bidDetails.length === 3) {
           const itemName = bidDetails[1];
-          const bidAmount = parseInt(bidDetails[2]);
-          botResponse = await placeBid(itemName, bidAmount);
+          const bidAmount = parseFloat(bidDetails[2]);
+          botResponse = await placeBid(userId, itemName, bidAmount);
         } else {
           botResponse = "Invalid format. Use: 'Bid itemName amount'.";
         }
@@ -73,7 +83,7 @@
       displayMessage(botResponse, 'bot'); // Display bot response
     }
 
-    // Function to display a message
+    // Function to display a message in the chat box
     function displayMessage(message, sender) {
       const chatBox = document.getElementById("chat-box");
       const messageDiv = document.createElement("div");
@@ -83,57 +93,50 @@
       chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
     }
 
-    // Function to get available auctions
-    async function getAvailableAuctions() {
-      const auctionsRef = database.ref('onlineAuction/users');
-      const snapshot = await auctionsRef.once('value');
-      const data = snapshot.val();
+    // Function to get user auctions
+    async function getUserAuctions(userId) {
+      const userAuctionsRef = db.ref(`onlineAuction/users/${userId}/auction-items`);
+      const snapshot = await userAuctionsRef.once('value');
+      if (!snapshot.exists()) return "You have no active auctions.";
 
-      let auctionList = "Available Auctions:\n";
-      for (const userId in data) {
-        if (data[userId].auction-items) {
-          const items = data[userId]['auction-items'];
-          for (const itemId in items) {
-            const item = items[itemId];
-            auctionList += `- ${item.name}: Starting at ${item.price}\n`;
-          }
-        }
-      }
-      return auctionList.trim() || "No auctions available.";
+      let auctionList = "Your Auctions:\n";
+      snapshot.forEach((childSnapshot) => {
+        const item = childSnapshot.val();
+        auctionList += `- ${item.name}: Highest Bid ${item.highestBid}\n`;
+      });
+      return auctionList;
     }
 
     // Function to place a bid
-    async function placeBid(itemName, bidAmount) {
-      const auctionsRef = database.ref('onlineAuction/users');
-      const snapshot = await auctionsRef.once('value');
-      const data = snapshot.val();
+    async function placeBid(userId, itemName, bidAmount) {
+      const userRef = db.ref('onlineAuction/users');
+      const snapshot = await userRef.once('value');
 
-      for (const userId in data) {
-        if (data[userId]['auction-items']) {
-          const items = data[userId]['auction-items'];
-          for (const itemId in items) {
-            const item = items[itemId];
-            if (item.name.toLowerCase() === itemName.toLowerCase()) {
-              if (bidAmount > item.highestBid) {
-                // Update highest bid
-                await database.ref(`onlineAuction/users/${userId}/auction-items/${itemId}`).update({
-                  highestBid: bidAmount,
-                  highestBidder: "YourUserID" // Replace with actual user ID
-                });
-                return `Your bid of ${bidAmount} for ${item.name} has been placed successfully.`;
-              } else {
-                return `Your bid must be higher than the current highest bid (${item.highestBid}).`;
-              }
+      for (const userIdKey in snapshot.val()) {
+        const userAuctionItems = snapshot.val()[userIdKey]['auction-items'];
+        for (const itemId in userAuctionItems) {
+          const item = userAuctionItems[itemId];
+          if (item.name.toLowerCase() === itemName.toLowerCase()) {
+            if (bidAmount > item.highestBid) {
+              // Update bid
+              const itemRef = db.ref(`onlineAuction/users/${userIdKey}/auction-items/${itemId}`);
+              await itemRef.update({
+                highestBid: bidAmount,
+                highestBidder: userId
+              });
+              return `Your bid of ${bidAmount} for ${item.name} was successful.`;
+            } else {
+              return `Your bid must be higher than the current highest bid (${item.highestBid}).`;
             }
           }
         }
       }
-      return `Item '${itemName}' not found in auctions.`;
+      return `Item '${itemName}' not found.`;
     }
 
-    // Display a welcome message on page load
-    window.onload = function() {
-      displayMessage("Welcome to the Online Auction! How may I assist you?", 'bot');
+    // Welcome message
+    window.onload = () => {
+      displayMessage("Welcome to the Online Auction Chatbot! How can I assist you?", 'bot');
     };
   </script>
 </body>

@@ -3,20 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chatbot</title>
+  <title>Online Auction Chatbot</title>
   <style>
     body { font-family: Arial, sans-serif; }
-    #chat-box { width: 300px; height: 400px; border: 1px solid #ccc; overflow-y: scroll; padding: 10px; }
+    #chat-box { width: 300px; height: 400px; border: 1px solid #ccc; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
     .message { margin: 10px 0; }
-    .user-msg { color: blue; }
-    .bot-msg { color: green; }
+    .user-msg { color: blue; text-align: right; }
+    .bot-msg { color: green; text-align: left; }
     input[type="text"] { width: 200px; }
   </style>
 </head>
 <body>
 
+  <h1>Online Auction Chatbot</h1>
   <div id="chat-box"></div>
-  <input type="text" id="user-input" placeholder="Type your message..." />
+  <input type="text" id="user-input" placeholder="Ask something..." />
   <button onclick="sendMessage()">Send</button>
 
   <!-- Firebase SDK -->
@@ -25,61 +26,55 @@
 
   <script>
     // Firebase configuration
- const firebaseConfig = {
-    apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
-    authDomain: "onlineauction-ba60b.firebaseapp.com",
-    databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
-    projectId: "onlineauction-ba60b",
-    storageBucket: "onlineauction-ba60b.appspot.com",
-    messagingSenderId: "313811380253",
-    appId: "1:313811380253:web:e80553266413d869dafef4"
-   };
+    const firebaseConfig = {
+      apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
+      authDomain: "onlineauction-ba60b.firebaseapp.com",
+      databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
+      projectId: "onlineauction-ba60b",
+      storageBucket: "onlineauction-ba60b.appspot.com",
+      messagingSenderId: "313811380253",
+      appId: "1:313811380253:web:e80553266413d869dafef4"
+    };
+
     // Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const database = firebase.database(app);
 
-    // Function to send user message and get bot response
+    // Function to send user messages
     async function sendMessage() {
       const userInput = document.getElementById("user-input").value;
-      if (userInput) {
-        displayMessage(userInput, 'user');
-        document.getElementById("user-input").value = '';
-        await handleUserMessage(userInput);
-      }
+      if (!userInput) return;
+
+      displayMessage(userInput, 'user'); // Display the user message
+      document.getElementById("user-input").value = ''; // Clear input
+      await handleBotResponse(userInput); // Generate bot response
     }
 
-    // Function to handle user input and generate bot response
-    async function handleUserMessage(userMessage) {
-      let botResponse = "How may I help you?";
+    // Function to handle bot responses
+    async function handleBotResponse(userMessage) {
+      let botResponse = "Sorry, I didn't understand that. Could you rephrase?";
 
-      // Store the user message in Firebase Realtime Database
-      const userMessageRef = database.ref('messages').push();
-      await userMessageRef.set({
-        sender: 'user',
-        message: userMessage,
-        timestamp: Date.now()
-      });
-
-      // Simple response logic based on input
-      if (userMessage.toLowerCase().includes("search")) {
-        botResponse = "Sure, what would you like to search for?";
-      } else if (userMessage.toLowerCase().includes("auction")) {
-        botResponse = "Are you looking to bid on an item?";
+      // Simple bot logic
+      if (userMessage.toLowerCase().includes("available auctions")) {
+        botResponse = "Here are the available auctions: Item A, Item B, Item C.";
+      } else if (userMessage.toLowerCase().includes("bid")) {
+        botResponse = "Please provide the item name and your bid amount.";
+      } else if (userMessage.toLowerCase().includes("help")) {
+        botResponse = "I can assist with available auctions, placing bids, and general queries.";
       }
 
-      // Store the bot response in Firebase Realtime Database
-      const botMessageRef = database.ref('messages').push();
+      // Save bot response to Firebase
+      const botMessageRef = database.ref('chatbot/messages').push();
       await botMessageRef.set({
         sender: 'bot',
         message: botResponse,
         timestamp: Date.now()
       });
 
-      // Display bot response
-      displayMessage(botResponse, 'bot');
+      displayMessage(botResponse, 'bot'); // Display bot response
     }
 
-    // Function to display message in chat box
+    // Function to display a message in the chat box
     function displayMessage(message, sender) {
       const chatBox = document.getElementById("chat-box");
       const messageDiv = document.createElement("div");
@@ -89,11 +84,10 @@
       chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
     }
 
-    // On page load, show initial greeting from bot
+    // Display a welcome message when the page loads
     window.onload = function() {
-      displayMessage("Hello! How may I help you?", 'bot');
+      displayMessage("Welcome to the Online Auction! How may I assist you?", 'bot');
     };
   </script>
-
 </body>
 </html>

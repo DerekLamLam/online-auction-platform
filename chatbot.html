@@ -20,11 +20,11 @@
   <button onclick="sendMessage()">Send</button>
 
   <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js"></script>
 
   <script>
     // Firebase configuration
-  const firebaseConfig = {
+    const firebaseConfig = {
     apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
     authDomain: "onlineauction-ba60b.firebaseapp.com",
     databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
@@ -34,10 +34,10 @@
     appId: "1:313811380253:web:e80553266413d869dafef4"
     };
 
-
+    
     // Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
+    const database = firebase.database(app);
 
     // Function to send user message and get bot response
     async function sendMessage() {
@@ -53,11 +53,12 @@
     async function handleUserMessage(userMessage) {
       let botResponse = "How may I help you?";
 
-      // Store the user message in Firebase
-      await db.collection('messages').add({
+      // Store the user message in Firebase Realtime Database
+      const userMessageRef = database.ref('messages').push();
+      await userMessageRef.set({
         sender: 'user',
         message: userMessage,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        timestamp: firebase.database.ServerValue.TIMESTAMP
       });
 
       // Simple response logic based on input
@@ -67,11 +68,12 @@
         botResponse = "Are you looking to bid on an item?";
       }
 
-      // Store the bot response in Firebase
-      await db.collection('messages').add({
+      // Store the bot response in Firebase Realtime Database
+      const botMessageRef = database.ref('messages').push();
+      await botMessageRef.set({
         sender: 'bot',
         message: botResponse,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        timestamp: firebase.database.ServerValue.TIMESTAMP
       });
 
       // Display bot response

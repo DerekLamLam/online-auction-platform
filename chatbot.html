@@ -19,12 +19,13 @@
   <input type="text" id="user-input" placeholder="Type your message..." />
   <button onclick="sendMessage()">Send</button>
 
-  <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js"></script>
 
   <script>
     // Firebase configuration
-    const firebaseConfig = {
+ const firebaseConfig = {
     apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
     authDomain: "onlineauction-ba60b.firebaseapp.com",
     databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
@@ -32,9 +33,7 @@
     storageBucket: "onlineauction-ba60b.appspot.com",
     messagingSenderId: "313811380253",
     appId: "1:313811380253:web:e80553266413d869dafef4"
-    };
-
-    
+   };
     // Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const database = firebase.database(app);
@@ -58,7 +57,7 @@
       await userMessageRef.set({
         sender: 'user',
         message: userMessage,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
+        timestamp: Date.now()
       });
 
       // Simple response logic based on input
@@ -73,7 +72,7 @@
       await botMessageRef.set({
         sender: 'bot',
         message: botResponse,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
+        timestamp: Date.now()
       });
 
       // Display bot response

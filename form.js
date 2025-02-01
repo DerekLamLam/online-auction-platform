@@ -147,51 +147,6 @@ async function placeBid(event, userUID, itemID, currentHighestBid, endTime) {
         alert("An error occurred while placing your bid. Please try again.");
     }
 }
-// Function to send email via Mailjet
-function sendEmailNotification(item) {
-    const emailSubject = `Auction for ${item.name} has ended`;
-    const emailBody = `
-        The bidding for your item "${item.name}" has ended. 
-        The highest bid was $${item.highestBid}, and the winning bidder is ${item.highestBidder}.
-    `;
-
-    const mailjetUrl = "https://api.mailjet.com/v3.1/send";
-    const emailData = {
-        "Messages": [
-            {
-                "From": {
-                    "Email": "your-email@example.com", // Your email here
-                    "Name": "Auction Platform"
-                },
-                "To": [
-                    {
-                        "Email": item.sellerEmail, // Seller's email here
-                        "Name": "Seller"
-                    }
-                ],
-                "Subject": emailSubject,
-                "TextPart": emailBody
-            }
-        ]
-    };
-
-    // Send the email using Mailjet API
-    fetch(mailjetUrl, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Basic " + btoa("206b0aa2a4bab969a6fd72bd9defd5d0" + ":" + "12760bc9c7d19f9df173bc96a288ab39")  // Replace with your Mailjet API key and secret
-        },
-        body: JSON.stringify(emailData),
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Email sent successfully:", data);
-    })
-    .catch(error => {
-        console.error("Error sending email:", error);
-    });
-}
 
 
 // Logout Function

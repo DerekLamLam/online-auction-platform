@@ -115,11 +115,7 @@ auth.onAuthStateChanged((user) => {
                     });
 
                     alert("Item uploaded successfully!");
-                    sendEmailNotification({
-                    name: itemName,
-                    highestBid: price,
-                    highestBidder: "None",
-                    sellerEmail: user.email, // Assuming the user is the seller
+                   
             });
         });
                 });

@@ -24,53 +24,16 @@
     <div class="logout-container">
         <button onclick="logout()">Logout</button>
     </div>
-    <button onclick="window.location.href='upload.html'">Back to userpage</button>
+ <button onclick="window.location.href='upload.html'">Back to userpage</button>
 
     <h2>All Auction Items</h2>
     <div id="allAuctionItems"></div> <!-- Auction items will be displayed here -->
 
     <script>
-        // Fetch and display auction items, and send emails for ended auctions
-        function fetchAllAuctionItems() {
-            const auctionRef = firebase.database().ref("auctionItems");
-
-            auctionRef.once('value', snapshot => {
-                const items = snapshot.val();
-                const allAuctionItemsDiv = document.getElementById("allAuctionItems");
-
-                // Loop through auction items and display them
-                for (let itemId in items) {
-                    const item = items[itemId];
-                    const itemElement = document.createElement('div');
-                    itemElement.classList.add('auction-item');
-
-                    // Display the item details (for example)
-                    itemElement.innerHTML = `
-                        <h3>${item.name}</h3>
-                        <p>Starting Price: $${item.price}</p>
-                        <p>End Time: ${new Date(item.endTime).toLocaleString()}</p>
-                    `;
-
-                    allAuctionItemsDiv.appendChild(itemElement);
-
-                    // Check if auction has ended
-                    const currentTime = Date.now();
-                    if (currentTime >= item.endTime) {
-                        // Auction has ended, send email notification
-                        sendEmailNotification({
-                            name: item.name,
-                            highestBid: item.highestBid,
-                            highestBidder: item.highestBidder || 'None',
-                            sellerEmail: item.sellerEmail // Assuming seller email is part of item data
-                        });
-                    }
-                }
-            });
-        }
-
         // Ensure user is authenticated and then fetch auction items
         document.addEventListener('DOMContentLoaded', () => {
-            fetchAllAuctionItems(); // Call function to display auction items and send emails for ended auctions
+            checkUserAuthentication(); // Check if user is logged in
+            fetchAllAuctionItems(); // Call function to display auction items
         });
     </script>
 </body>

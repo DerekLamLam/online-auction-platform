@@ -17,6 +17,12 @@
         /* Example styles */
         .auction-item {
             margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        .timer {
+            font-weight: bold;
+            color: red;
         }
     </style>
 </head>
@@ -24,16 +30,18 @@
     <div class="logout-container">
         <button onclick="logout()">Logout</button>
     </div>
- <button onclick="window.location.href='upload.html'">Back to userpage</button>
+    <button onclick="window.location.href='upload.html'">Back to userpage</button>
 
     <h2>All Auction Items</h2>
     <div id="allAuctionItems"></div> <!-- Auction items will be displayed here -->
 
     <script>
-        // Ensure user is authenticated and then fetch auction items
         document.addEventListener('DOMContentLoaded', () => {
             checkUserAuthentication(); // Check if user is logged in
-            fetchAllAuctionItems(); // Call function to display auction items
+            fetchAllAuctionItems(); // Display auction items
+
+            // Call function from form.js to start monitoring auctions
+            startAuctionMonitoring();
         });
     </script>
 </body>

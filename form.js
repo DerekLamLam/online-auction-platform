@@ -249,6 +249,9 @@ function formatTime(ms) {
  * Function to send an email when an auction ends.
  */
 function sendAuctionEndEmail(sellerEmail, auctionTitle, finalPrice, winnerEmail) {
+    const apiKey = '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';
+    console.log("Brevo API Key:", apiKey');
+
     const payload = {
         sender: { name: 'Auction Platform', email: '84de5a001@smtp-brevo.com' },
         to: [{ email: sellerEmail }],
@@ -271,7 +274,7 @@ function sendAuctionEndEmail(sellerEmail, auctionTitle, finalPrice, winnerEmail)
         headers: {
             'Content-Type': 'application/json',
             // Replace with your actual Brevo API key
-            'api-key': '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'
+            'api-key': apiKey
         },
         body: JSON.stringify(payload)
     })

@@ -20,34 +20,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 const storage = firebase.storage();
-const { sendEmail } = require('./emailService');
 
-// Example function to check auction end
-const checkAuctionEnd = (auction) => {
-    const now = new Date();
-    if (auction.endTime <= now) {
-        // Auction has ended
-        const sellerEmail = auction.sellerEmail; // Assuming you have seller's email in the auction object
-        const itemName = auction.itemName;
-        const highestBid = auction.highestBid;
-
-        // Send email to seller
-        sendEmail(sellerEmail, itemName, highestBid);
-
-        // Update auction status in Firebase (optional)
-        // ...
-    }
-};
-
-// Example usage
-const auction = {
-    endTime: new Date('2023-12-31T23:59:59'), // Replace with actual end time
-    sellerEmail: 'seller@example.com', // Replace with actual seller email
-    itemName: 'Vintage Watch',
-    highestBid: 150,
-};
-
-checkAuctionEnd(auction);
 // Function to calculate remaining time in "Xd Xh Xm" format
 function calculateRemainingTime(endTime) {
     const now = Date.now();

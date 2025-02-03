@@ -253,7 +253,7 @@ function sendAuctionEndEmail(sellerEmail, auctionTitle, finalPrice, winnerEmail)
     console.log("Brevo API Key:", apiKey);
 
     const payload = {
-        sender: { name: 'Auction Platform', email: '84de5a001@smtp-brevo.com' },
+        sender: { name: 'Auction Platform', email: 'tszhin8889@gmail.com' },
         to: [{ email: sellerEmail }],
         subject: `Your Auction "${auctionTitle}" Has Ended`,
         htmlContent: `

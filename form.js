@@ -149,6 +149,56 @@ async function placeBid(event, userUID, itemID, currentHighestBid, endTime) {
 }
 
 
+function sendAuctionEndEmail(sellerEmail, auctionTitle, finalPrice, winnerEmail) {
+  const payload = {
+    sender: { name: 'Your Auction Platform', email: '84de5a001@smtp-brevo.com' },
+    to: [{ email: sellerEmail }],
+    subject: `Your Auction "${auctionTitle}" Has Ended`,
+    htmlContent: `
+      <html>
+        <body>
+          <p>Dear Seller,</p>
+          <p>Your auction <strong>${auctionTitle}</strong> has ended.</p>
+          <p><strong>Final Price:</strong> ${finalPrice}</p>
+          <p><strong>Winning Bidder:</strong> ${winnerEmail}</p>
+          <p>Thank you for using our auction platform!</p>
+        </body>
+      </html>
+    `
+  };
+
+  fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      // Replace with your actual Brevo API key
+      'api-key': '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'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Email sent successfully:', data);
+  })
+  .catch(error => {
+    console.error('Error sending email:', error);
+  });
+}
+
+
+function onAuctionEnd(auctionData) {
+  // Optionally, freeze bidding and update UI here if not already done.
+  sendAuctionEndEmail(
+    auctionData.sellerEmail,
+    auctionData.title,
+    auctionData.currentPrice,
+    auctionData.winnerEmail
+  );
+}
+
+
+
+
 // Logout Function
 function logout() {
     auth.signOut().then(() => {

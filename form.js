@@ -169,6 +169,45 @@ function checkUserAuthentication(redirectUrl = "index.html") {
     });
 }
 // form.js
+// Import the email function from email.js
+import { sendEmailNotification } from './email.js'; // Adjust path if necessary
+
+// Function to monitor auctions and check if the auction has ended
+function monitorAuctions() {
+    const auctionsRef = firebase.database().ref("onlineAuction/users");
+
+    auctionsRef.on("value", (snapshot) => {
+        snapshot.forEach((userSnapshot) => {
+            const userId = userSnapshot.key;
+            const userAuctions = userSnapshot.child("auction-items");
+
+            userAuctions.forEach((auctionSnapshot) => {
+                const auctionData = auctionSnapshot.val();
+                const auctionId = auctionSnapshot.key;
+                const endTime = auctionData.endTime; // Auction end time (timestamp)
+
+                // Get the current time
+                const currentTime = new Date().getTime();
+
+                // Check if auction has ended and notification hasn't been sent yet
+                if (endTime <= currentTime && auctionData.notificationSent !== true) {
+                    console.log(`Auction ended: ${auctionData.name}`);
+
+                    // Send email to seller
+                    sendEmailNotification(auctionData.sellerEmail, auctionData.name);
+
+                    // Mark that notification has been sent to prevent duplicate emails
+                    firebase.database().ref(`onlineAuction/users/${userId}/auction-items/${auctionId}`).update({
+                        notificationSent: true,
+                    });
+                }
+            });
+        });
+    });
+}
+
+// Call the function to start monitoring auctions
+monitorAuctions();
 
 
 // Example: Usage of checkUserAuthentication for pages requiring login

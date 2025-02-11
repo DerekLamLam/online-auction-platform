@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Online Auction Chatbot</title>
+  
   <style>
     body { font-family: Arial, sans-serif; }
     #chat-box { width: 300px; height: 400px; border: 1px solid #ccc; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
@@ -17,7 +18,7 @@
 
   <h1>Online Auction Chatbot</h1>
   <div class="logout-container">
-        <button onclick="logout()">Logout</button>
+        <button onclick=>Logout</button>
     </div>
   <div id="chat-box"></div>
   <input type="text" id="user-input" placeholder="Ask something..." />
@@ -27,23 +28,10 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
-   <script src="form.js"></script>
+ 
   <script>
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
-      authDomain: "onlineauction-ba60b.firebaseapp.com",
-      databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
-      projectId: "onlineauction-ba60b",
-      storageBucket: "onlineauction-ba60b.appspot.com",
-      messagingSenderId: "313811380253",
-      appId: "1:313811380253:web:e80553266413d869dafef4"
-    };
 
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+
 
     // Function to send user messages
     function sendMessage() {

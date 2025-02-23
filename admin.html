@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
+            authDomain: "onlineauction-ba60b.firebaseapp.com",
+            databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
+            projectId: "onlineauction-ba60b",
+            storageBucket: "onlineauction-ba60b.appspot.com",
+            messagingSenderId: "313811380253",
+            appId: "1:313811380253:web:e80553266413d869dafef4"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const admin = JSON.parse(localStorage.getItem('loggedInAdmin'));
+            if (!admin || admin.email !== "admin@example.com") {
+                alert("Access Denied!");
+                window.location.href = "index.html"; // Redirect to login page
+            } else {
+                loadUsers(); // Load users after admin verification
+            }
+        });
+
+        // Function to load all users
+        function loadUsers() {
+            const usersRef = db.ref('onlineAuction/users');
+            usersRef.once('value').then(snapshot => {
+                const usersList = document.getElementById('usersList');
+                usersList.innerHTML = ""; // Clear previous content
+                snapshot.forEach(userSnapshot => {
+                    const user = userSnapshot.val();
+                    const userId = userSnapshot.key;
+                    const userDiv = document.createElement('div');
+                    userDiv.innerHTML = `
+                        <p>${user.username} (${user.email})</p>
+                        <button onclick="deleteUser('${userId}')">Delete User</button>
+                        <button onclick="viewUserDetails('${userId}')">View Details</button>
+                    `;
+                    usersList.appendChild(userDiv);
+                });
+            });
+        }
+
+        // Function to delete user
+        function deleteUser(userId) {
+            const userRef = db.ref('onlineAuction/users/' + userId);
+            userRef.remove()
+                .then(() => {
+                    alert("User deleted successfully!");
+                    loadUsers(); // Refresh user list
+                })
+                .catch(error => {
+                    alert("Error deleting user: " + error.message);
+                });
+        }
+
+        // Function to view user details (for editing)
+        function viewUserDetails(userId) {
+            // You can implement logic to view and edit the user's data
+            alert(`View details for user: ${userId}`);
+        }
+
+        // Function for admin logout
+        function logout() {
+            auth.signOut().then(() => {
+                localStorage.removeItem('loggedInAdmin');
+                window.location.href = "index.html"; // Redirect to login page
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <button onclick="logout()">Logout</button>
+    <h2>Manage Users</h2>
+    <div id="usersList"></div> <!-- Users list will be displayed here -->
+</body>
+</html>

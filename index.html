@@ -41,10 +41,14 @@
                             email: user.email,
                             uid: user.uid
                         }));
-
-                        // Login successful, redirect to upload.html
-                        alert("Login successful!");
-                        window.location.href = 'upload.html';
+                        // Check if the logged-in user is the admin
+                     if (user.email === "tszhim8889@gmail.com") {
+                            // Redirect to admin page
+                            window.location.href = 'admin.html';
+                        } else {
+                            // Redirect to user upload page
+                            window.location.href = 'upload.html';
+                        }
                     })
                     .catch((error) => {
                         console.error("Error during login:", error.message);

@@ -42,12 +42,13 @@
                             uid: user.uid
                         }));
                         // Check if the logged-in user is the admin
-                     if (user.email === "tszhim8889@gmail.com") {
-                            // Redirect to admin page
-                            window.location.href = 'admin.html';
+                 const adminEmails = ["tszhim8889@gmail.com"];  // List of admin emails
+                        if (adminEmails.includes(user.email)) {
+                        // Redirect to admin page
+                        window.location.href = 'admin.html';
                         } else {
-                            // Redirect to user upload page
-                            window.location.href = 'upload.html';
+                        // Redirect to user upload page
+                        window.location.href = 'upload.html';
                         }
                     })
                     .catch((error) => {

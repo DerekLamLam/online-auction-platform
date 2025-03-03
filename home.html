@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
 
-    <!-- Link to external JS file -->
+    <!-- Link to external JS file (form.js) -->
     <script src="form.js" defer></script>
 
     <style>
@@ -24,6 +24,21 @@
             font-weight: bold;
             color: red;
         }
+        .recommendation-container {
+            margin-top: 30px;
+            border-top: 2px solid #ccc;
+            padding-top: 20px;
+        }
+        .recommendation-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px dashed #bbb;
+            background-color: #f9f9f9;
+        }
+        .recommendation-header {
+            font-size: 18px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -35,6 +50,13 @@
     <h2>All Auction Items</h2>
     <div id="allAuctionItems"></div> <!-- Auction items will be displayed here -->
 
+    <div class="recommendation-container">
+        <h3 class="recommendation-header">Recommended for You</h3>
+        <div id="recommendedItems">
+            <!-- Recommended auction items will be displayed here -->
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             checkUserAuthentication(); // Check if user is logged in
@@ -42,6 +64,9 @@
 
             // Call function from form.js to start monitoring auctions
             startAuctionMonitoring();
+
+            // Fetch recommended items from form.js
+            fetchRecommendedItems(); // This is where you call the function defined in form.js
         });
     </script>
 </body>

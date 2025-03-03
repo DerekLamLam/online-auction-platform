@@ -171,6 +171,31 @@ function checkUserAuthentication(redirectUrl = "index.html") {
 // form.js
 
 
+// Function to fetch recommended items from the server
+function fetchRecommendedItems() {
+    fetch('/api/recommended-auctions') // Your server URL here
+        .then(response => response.json())  // Assuming the response is in JSON format
+        .then(data => {
+            const recommendedContainer = document.getElementById('recommendedItems');
+            // Clear any existing content
+            recommendedContainer.innerHTML = '';
+            data.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.classList.add('recommendation-item');
+                itemElement.innerHTML = `
+                    <h4>${item.title}</h4>
+                    <p>${item.description}</p>
+                    <p class="timer">Time remaining: ${item.timer}</p>
+                `;
+                recommendedContainer.appendChild(itemElement);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching recommended items:', error);
+        });
+}
+
+
 // Example: Usage of checkUserAuthentication for pages requiring login
 document.addEventListener("DOMContentLoaded", () => {
     checkUserAuthentication(); 

@@ -170,22 +170,34 @@ function checkUserAuthentication(redirectUrl = "index.html") {
 }
 // form.js
 
+// form.js
 
-// Function to fetch recommended items from the server
+// Function to fetch recommended items
 function fetchRecommendedItems() {
-    fetch('/api/recommended-auctions') // Your server URL here
-        .then(response => response.json())  // Assuming the response is in JSON format
+    // Assuming you have an API endpoint or Firebase query to fetch auction data
+    fetch('/api/auction-items') // This should return all auction items from the server
+        .then(response => response.json())
         .then(data => {
+            // Filter out items that have already ended
+            const activeItems = data.filter(item => item.remainingTime !== 'Auction ended');
+
+            // Randomly shuffle the active items
+            const shuffledItems = activeItems.sort(() => 0.5 - Math.random());
+
+            // Limit to a few items to show in the recommendation
+            const recommendedItems = shuffledItems.slice(0, 5); // You can change the number here
+
             const recommendedContainer = document.getElementById('recommendedItems');
-            // Clear any existing content
-            recommendedContainer.innerHTML = '';
-            data.forEach(item => {
+            recommendedContainer.innerHTML = ''; // Clear any existing recommendations
+
+            // Display recommended items
+            recommendedItems.forEach(item => {
                 const itemElement = document.createElement('div');
                 itemElement.classList.add('recommendation-item');
                 itemElement.innerHTML = `
                     <h4>${item.title}</h4>
                     <p>${item.description}</p>
-                    <p class="timer">Time remaining: ${item.timer}</p>
+                    <p class="timer">Time remaining: ${item.remainingTime}</p>
                 `;
                 recommendedContainer.appendChild(itemElement);
             });
@@ -194,7 +206,6 @@ function fetchRecommendedItems() {
             console.error('Error fetching recommended items:', error);
         });
 }
-
 
 // Example: Usage of checkUserAuthentication for pages requiring login
 document.addEventListener("DOMContentLoaded", () => {

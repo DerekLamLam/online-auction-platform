@@ -4,161 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auction Recommendations</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            padding: 20px;
-            background-color: #333;
-            color: white;
-        }
-
-        .recommendation-section {
-            margin-top: 30px;
-        }
-
-        .recommendation-title {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-
-        .item-card {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            margin: 15px;
-            padding: 15px;
-            text-align: center;
-            width: 200px;
-            display: inline-block;
-            vertical-align: top;
-            transition: transform 0.3s ease;
-        }
-
-        .item-card:hover {
-            transform: scale(1.05);
-        }
-
-        .item-image {
-            width: 100%;
-            border-radius: 8px;
-        }
-
-        .item-name {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        .item-price {
-            color: #888;
-            font-size: 16px;
-            margin-top: 5px;
-        }
-
-        .bid-button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            background-color: #333;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .bid-button:hover {
-            background-color: #555;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 10px;
-            background-color: #333;
-            color: white;
-        }
-    </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>Welcome to the Auction Platform</h1>
-    <p>Here are some recommendations based on your preferences:</p>
-</div>
-
-<div class="container">
-    <div class="recommendation-section">
-        <div class="recommendation-title">Recommended for You</div>
-        <div id="recommendation-list"></div> <!-- Placeholder for items -->
-    </div>
-</div>
-
-<div class="footer">
-    <p>&copy; 2025 Auction Platform. All rights reserved.</p>
-</div>
-
 <script>
-    // Sample data for recommendations
-    const recommendedItems = [
+    // List of available items
+    const allItems = [
         {
             name: "Vintage Painting",
             price: "$150",
-            image: "https://via.placeholder.com/200",
+            description: "A beautiful vintage painting from the 19th century."
         },
         {
             name: "Rare Coins Collection",
             price: "$200",
-            image: "https://via.placeholder.com/200",
+            description: "A collection of rare historical coins."
         },
         {
             name: "Antique Clock",
             price: "$300",
-            image: "https://via.placeholder.com/200",
+            description: "An antique clock from the early 1900s, still working perfectly."
         },
         {
             name: "Luxury Watch",
             price: "$500",
-            image: "https://via.placeholder.com/200",
+            description: "A luxury wristwatch with fine craftsmanship."
         }
     ];
 
-    // Function to render items
-    function renderRecommendations(items) {
-        const container = document.getElementById('recommendation-list');
-        container.innerHTML = '';  // Clear any previous content
-
-        items.forEach(item => {
-            const itemCard = document.createElement('div');
-            itemCard.className = 'item-card';
-            itemCard.innerHTML = `
-                <img src="${item.image}" alt="${item.name}" class="item-image">
-                <div class="item-name">${item.name}</div>
-                <div class="item-price">${item.price}</div>
-                <button class="bid-button" onclick="placeBid('${item.name}')">Place Bid</button>
-            `;
-            container.appendChild(itemCard);
-        });
+    // Function to generate a random recommendation
+    function getRandomRecommendation() {
+        const randomIndex = Math.floor(Math.random() * allItems.length);
+        return allItems[randomIndex];
     }
 
-    // Function to simulate placing a bid
-    function placeBid(itemName) {
-        alert("You placed a bid on " + itemName);
+    // Function to display a recommendation to the user
+    function showRecommendation() {
+        const recommendedItem = getRandomRecommendation();
+        alert(`Recommended for You: \n${recommendedItem.name}\nPrice: ${recommendedItem.price}\nDescription: ${recommendedItem.description}`);
     }
 
-    // Render the recommendations when the page loads
-    renderRecommendations(recommendedItems);
+    // Call the function to display a recommendation
+    showRecommendation();
 </script>
 
 </body>

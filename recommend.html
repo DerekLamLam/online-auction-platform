@@ -101,34 +101,7 @@
 <div class="container">
     <div class="recommendation-section">
         <div class="recommendation-title">Recommended for You</div>
-
-        <div class="item-card">
-            <img src="https://via.placeholder.com/200" alt="Item 1" class="item-image">
-            <div class="item-name">Vintage Painting</div>
-            <div class="item-price">$150</div>
-            <button class="bid-button" onclick="placeBid('Vintage Painting')">Place Bid</button>
-        </div>
-
-        <div class="item-card">
-            <img src="https://via.placeholder.com/200" alt="Item 2" class="item-image">
-            <div class="item-name">Rare Coins Collection</div>
-            <div class="item-price">$200</div>
-            <button class="bid-button" onclick="placeBid('Rare Coins Collection')">Place Bid</button>
-        </div>
-
-        <div class="item-card">
-            <img src="https://via.placeholder.com/200" alt="Item 3" class="item-image">
-            <div class="item-name">Antique Clock</div>
-            <div class="item-price">$300</div>
-            <button class="bid-button" onclick="placeBid('Antique Clock')">Place Bid</button>
-        </div>
-
-        <div class="item-card">
-            <img src="https://via.placeholder.com/200" alt="Item 4" class="item-image">
-            <div class="item-name">Luxury Watch</div>
-            <div class="item-price">$500</div>
-            <button class="bid-button" onclick="placeBid('Luxury Watch')">Place Bid</button>
-        </div>
+        <div id="recommendation-list"></div> <!-- Placeholder for items -->
     </div>
 </div>
 
@@ -137,9 +110,55 @@
 </div>
 
 <script>
+    // Sample data for recommendations
+    const recommendedItems = [
+        {
+            name: "Vintage Painting",
+            price: "$150",
+            image: "https://via.placeholder.com/200",
+        },
+        {
+            name: "Rare Coins Collection",
+            price: "$200",
+            image: "https://via.placeholder.com/200",
+        },
+        {
+            name: "Antique Clock",
+            price: "$300",
+            image: "https://via.placeholder.com/200",
+        },
+        {
+            name: "Luxury Watch",
+            price: "$500",
+            image: "https://via.placeholder.com/200",
+        }
+    ];
+
+    // Function to render items
+    function renderRecommendations(items) {
+        const container = document.getElementById('recommendation-list');
+        container.innerHTML = '';  // Clear any previous content
+
+        items.forEach(item => {
+            const itemCard = document.createElement('div');
+            itemCard.className = 'item-card';
+            itemCard.innerHTML = `
+                <img src="${item.image}" alt="${item.name}" class="item-image">
+                <div class="item-name">${item.name}</div>
+                <div class="item-price">${item.price}</div>
+                <button class="bid-button" onclick="placeBid('${item.name}')">Place Bid</button>
+            `;
+            container.appendChild(itemCard);
+        });
+    }
+
+    // Function to simulate placing a bid
     function placeBid(itemName) {
         alert("You placed a bid on " + itemName);
     }
+
+    // Render the recommendations when the page loads
+    renderRecommendations(recommendedItems);
 </script>
 
 </body>

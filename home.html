@@ -47,15 +47,16 @@
     </div>
     <button onclick="window.location.href='upload.html'">Back to userpage</button>
 
-    <h2>All Auction Items</h2>
-    <div id="allAuctionItems"></div> <!-- Auction items will be displayed here -->
-
+    <!-- Recommendation Section at the Top -->
     <div class="recommendation-container">
         <h3 class="recommendation-header">Recommended for You</h3>
         <div id="recommendedItems">
             <!-- Recommended auction items will be displayed here -->
         </div>
     </div>
+
+    <h2>All Auction Items</h2>
+    <div id="allAuctionItems"></div> <!-- Auction items will be displayed here -->
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -66,7 +67,7 @@
             startAuctionMonitoring();
 
             // Fetch recommended items from form.js
-            fetchRecommendedItems(); // This is where you call the function defined in form.js
+            fetchRecommendedItems(); // Call the function defined in form.js
         });
     </script>
 </body>

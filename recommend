@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auction Recommendations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: white;
+        }
+
+        .recommendation-section {
+            margin-top: 30px;
+        }
+
+        .recommendation-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .item-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin: 15px;
+            padding: 15px;
+            text-align: center;
+            width: 200px;
+            display: inline-block;
+            vertical-align: top;
+            transition: transform 0.3s ease;
+        }
+
+        .item-card:hover {
+            transform: scale(1.05);
+        }
+
+        .item-image {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .item-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .item-price {
+            color: #888;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        .bid-button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .bid-button:hover {
+            background-color: #555;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Welcome to the Auction Platform</h1>
+    <p>Here are some recommendations based on your preferences:</p>
+</div>
+
+<div class="container">
+    <div class="recommendation-section">
+        <div class="recommendation-title">Recommended for You</div>
+
+        <div class="item-card">
+            <img src="https://via.placeholder.com/200" alt="Item 1" class="item-image">
+            <div class="item-name">Vintage Painting</div>
+            <div class="item-price">$150</div>
+            <button class="bid-button" onclick="placeBid('Vintage Painting')">Place Bid</button>
+        </div>
+
+        <div class="item-card">
+            <img src="https://via.placeholder.com/200" alt="Item 2" class="item-image">
+            <div class="item-name">Rare Coins Collection</div>
+            <div class="item-price">$200</div>
+            <button class="bid-button" onclick="placeBid('Rare Coins Collection')">Place Bid</button>
+        </div>
+
+        <div class="item-card">
+            <img src="https://via.placeholder.com/200" alt="Item 3" class="item-image">
+            <div class="item-name">Antique Clock</div>
+            <div class="item-price">$300</div>
+            <button class="bid-button" onclick="placeBid('Antique Clock')">Place Bid</button>
+        </div>
+
+        <div class="item-card">
+            <img src="https://via.placeholder.com/200" alt="Item 4" class="item-image">
+            <div class="item-name">Luxury Watch</div>
+            <div class="item-price">$500</div>
+            <button class="bid-button" onclick="placeBid('Luxury Watch')">Place Bid</button>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <p>&copy; 2025 Auction Platform. All rights reserved.</p>
+</div>
+
+<script>
+    function placeBid(itemName) {
+        alert("You placed a bid on " + itemName);
+    }
+</script>
+
+</body>
+</html>

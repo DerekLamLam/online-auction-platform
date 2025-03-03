@@ -168,8 +168,7 @@ function checkUserAuthentication(redirectUrl = "index.html") {
         }
     });
 }
-
-// Function to fetch recommended items from Firebase
+// Function to fetch recommended items from Firebase and display a random one
 function fetchRecommendedItems() {
     const usersRef = db.ref('onlineAuction/users'); // Reference to all users' auction items
     usersRef.once('value', (snapshot) => {
@@ -196,20 +195,22 @@ function fetchRecommendedItems() {
             });
         });
 
-        // Randomly shuffle the active items and select a few for recommendation
-        activeItems = activeItems.sort(() => 0.5 - Math.random()).slice(0, 5);
+        if (activeItems.length > 0) {
+            // Randomly pick one active item
+            const randomItem = activeItems[Math.floor(Math.random() * activeItems.length)];
 
-        // Display the recommended items
-        activeItems.forEach(item => {
+            // Display the recommended item
             const itemElement = document.createElement('div');
             itemElement.classList.add('recommendation-item');
             itemElement.innerHTML = `
-                <h4>${item.title}</h4>
-                <p>${item.description}</p>
-                <p class="timer">Time remaining: ${item.remainingTime}</p>
+                <h4>${randomItem.title}</h4>
+                <p>${randomItem.description}</p>
+                <p class="timer">Time remaining: ${randomItem.remainingTime}</p>
             `;
             recommendedContainer.appendChild(itemElement);
-        });
+        } else {
+            recommendedContainer.innerHTML = '<p>No active auctions to recommend.</p>';
+        }
     });
 }
 

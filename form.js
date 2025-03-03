@@ -168,43 +168,49 @@ function checkUserAuthentication(redirectUrl = "index.html") {
         }
     });
 }
-// form.js
 
-// form.js
-
-// Function to fetch recommended items
+// Function to fetch recommended items from Firebase
 function fetchRecommendedItems() {
-    // Assuming you have an API endpoint or Firebase query to fetch auction data
-    fetch('/api/auction-items') // This should return all auction items from the server
-        .then(response => response.json())
-        .then(data => {
-            // Filter out items that have already ended
-            const activeItems = data.filter(item => item.remainingTime !== 'Auction ended');
+    const usersRef = db.ref('onlineAuction/users'); // Reference to all users' auction items
+    usersRef.once('value', (snapshot) => {
+        const recommendedContainer = document.getElementById('recommendedItems');
+        recommendedContainer.innerHTML = ''; // Clear any existing recommendations
 
-            // Randomly shuffle the active items
-            const shuffledItems = activeItems.sort(() => 0.5 - Math.random());
+        let activeItems = [];
 
-            // Limit to a few items to show in the recommendation
-            const recommendedItems = shuffledItems.slice(0, 5); // You can change the number here
+        snapshot.forEach((userSnapshot) => {
+            userSnapshot.child('auction-items').forEach((itemSnapshot) => {
+                const itemData = itemSnapshot.val();
+                const itemID = itemSnapshot.key;
 
-            const recommendedContainer = document.getElementById('recommendedItems');
-            recommendedContainer.innerHTML = ''; // Clear any existing recommendations
-
-            // Display recommended items
-            recommendedItems.forEach(item => {
-                const itemElement = document.createElement('div');
-                itemElement.classList.add('recommendation-item');
-                itemElement.innerHTML = `
-                    <h4>${item.title}</h4>
-                    <p>${item.description}</p>
-                    <p class="timer">Time remaining: ${item.remainingTime}</p>
-                `;
-                recommendedContainer.appendChild(itemElement);
+                // Check if auction is still ongoing
+                const remainingTime = calculateRemainingTime(itemData.endTime);
+                if (remainingTime !== "Auction ended") {
+                    activeItems.push({
+                        id: itemID,
+                        title: itemData.name,
+                        description: itemData.description,
+                        remainingTime: remainingTime
+                    });
+                }
             });
-        })
-        .catch(error => {
-            console.error('Error fetching recommended items:', error);
         });
+
+        // Randomly shuffle the active items and select a few for recommendation
+        activeItems = activeItems.sort(() => 0.5 - Math.random()).slice(0, 5);
+
+        // Display the recommended items
+        activeItems.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.classList.add('recommendation-item');
+            itemElement.innerHTML = `
+                <h4>${item.title}</h4>
+                <p>${item.description}</p>
+                <p class="timer">Time remaining: ${item.remainingTime}</p>
+            `;
+            recommendedContainer.appendChild(itemElement);
+        });
+    });
 }
 
 // Example: Usage of checkUserAuthentication for pages requiring login

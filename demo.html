@@ -188,10 +188,32 @@
     </div>
 
     <script>
-        // Ensure the user is authenticated
+        // Show message if user is not logged in
+        function checkUserAuthentication() {
+            firebase.auth().onAuthStateChanged((user) => {
+                if (!user) {
+                    alert("You must be logged in to access this page.");
+                    window.location.href = "index.html"; // Redirect to login page
+                }
+            });
+        }
+
+        // Logout function
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                alert("You have been logged out successfully.");
+                window.location.href = "index.html"; // Redirect to login page
+            }).catch((error) => {
+                console.error("Error logging out: ", error);
+            });
+        }
+
+        // Ensure the user is authenticated on page load
         checkUserAuthentication();
+
+        // Handle user login and logout correctly
         auth.onAuthStateChanged((user) => {
-            if (!user) return;
+            if (!user) return; // If user is not logged in, do nothing
 
             const userId = user.uid;
             const userRef = firebase.database().ref(`onlineAuction/users/${userId}`);

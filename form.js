@@ -169,48 +169,40 @@ function checkUserAuthentication(redirectUrl = "index.html") {
     });
 }
 // Function to fetch recommended items from Firebase and display a random one
-function fetchRecommendedItems() {
-    const usersRef = db.ref('onlineAuction/users'); // Reference to all users' auction items
-    usersRef.once('value', (snapshot) => {
-        const recommendedContainer = document.getElementById('recommendedItems');
-        recommendedContainer.innerHTML = ''; // Clear any existing recommendations
+async function recommendRandomAuctionItem() {
+    const recommendedContainer = document.getElementById('recommendedItem');
 
-        let activeItems = [];
+    try {
+        const auctionsRef = firebase.database().ref('onlineAuction/users');
+        const snapshot = await auctionsRef.once('value');
 
-        snapshot.forEach((userSnapshot) => {
-            userSnapshot.child('auction-items').forEach((itemSnapshot) => {
-                const itemData = itemSnapshot.val();
-                const itemID = itemSnapshot.key;
+        const availableItems = [];
+        const currentTime = new Date().getTime();
 
-                // Check if auction is still ongoing
-                const remainingTime = calculateRemainingTime(itemData.endTime);
-                if (remainingTime !== "Auction ended") {
-                    activeItems.push({
-                        id: itemID,
-                        title: itemData.name,
-                        description: itemData.description,
-                        remainingTime: remainingTime
-                    });
+        snapshot.forEach(userSnapshot => {
+            userSnapshot.child('auction-items').forEach(itemSnapshot => {
+                const item = itemSnapshot.val();
+                if (item.endTime > currentTime) {
+                    availableItems.push(item);
                 }
             });
         });
 
-        if (activeItems.length > 0) {
-            // Randomly pick one active item
-            const randomItem = activeItems[Math.floor(Math.random() * activeItems.length)];
-
-            // Display the recommended item
-            const itemElement = document.createElement('div');
-            itemElement.classList.add('recommendation-item');
-            itemElement.innerHTML = `
-                <h4>${randomItem.title}</h4>
-                <p>${randomItem.description}</p>
-                <p class="timer">Time remaining: ${randomItem.remainingTime}</p>
-            `;
-            recommendedContainer.appendChild(itemElement);
-        } else {
-            recommendedContainer.innerHTML = '<p>No active auctions to recommend.</p>';
+        if (availableItems.length === 0) {
+            recommendedContainer.innerHTML = '<p>No available auctions to recommend.</p>';
+            return;
         }
+
+        const randomItem = availableItems[Math.floor(Math.random() * availableItems.length)];
+        recommendedContainer.innerHTML = `
+            <div class=\"recommendation-item\">
+                <h3>${randomItem.name}</h3>
+                <p>Description: ${randomItem.description}</p>
+                <p>Current Highest Bid: $${randomItem.highestBid}</p>
+                <p>Remaining Time: ${new Date(randomItem.endTime).toLocaleString()}</p>
+                <img src=\"${randomItem.imageUrl}\" alt=\"Recommended Item\" width=\"150\">
+            </div>
+        `;
     });
 }
 

@@ -60,15 +60,10 @@
     <div id="allAuctionItems"></div> <!-- Auction items will be displayed here -->
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-        if (typeof recommendRandomAuctionItem === 'function') {
-            recommendRandomAuctionItem();
-        } else {
-            console.error('recommendRandomAuctionItem function is not loaded.');
-        }
-        });
+       
         document.addEventListener('DOMContentLoaded', () => {
             checkUserAuthentication(); // Check if user is logged in
+            recommendRandomAuctionItem();
             fetchAllAuctionItems(); // Display auction items
 
             // Call function from form.js to start monitoring auctions

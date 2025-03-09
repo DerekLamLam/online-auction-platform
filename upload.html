@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>userpage</title>
+    <title>Userpage</title>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
@@ -11,72 +11,201 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-storage-compat.js"></script>
     <script src="form.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 100px auto;
+        }
+
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-container {
+            margin-bottom: 20px;
+        }
+
+        .form-container label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-container input,
+        .form-container textarea,
+        .form-container select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .form-container textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        button {
+            width: 48%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .delete-button {
+            background-color: red;
+        }
+
+        .delete-button:hover {
+            background-color: #d32f2f;
+        }
+
+        .auction-item-container {
+            margin-top: 20px;
+        }
+
+        .auction-item-container h2 {
+            margin-top: 20px;
+        }
+
+        .auction-item-container .item {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .auction-item-container .item img {
+            max-width: 200px; /* Increased image size */
+            margin-top: 10px;
+        }
+
+        .logout-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .top-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin: 20px;
+        }
+
+        .top-buttons button {
+            padding: 10px 20px;
+            background-color: #2196F3; /* Blue color */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .top-buttons button:hover {
+            background-color: #1976D2; /* Darker blue for hover */
+        }
+    </style>
 </head>
 <body>
-    <div class="form-container">
-        <div class="button-container">
-            <button onclick="window.location.href='home.html'">Go to Homepage</button>
-        </div>
-         <div class="button-container">
-            <button onclick="window.location.href='chatbot.html'">Go to chatbot</button>
-        </div>
-        <div class="logout-container">
-            <button onclick="logout()">Logout</button>
-        </div>
-        <h1 id="welcomeMessage">Welcome  </h1>
+    <!-- Top buttons for navigation -->
+    <div class="top-buttons">
+        <button onclick="window.location.href='home.html'">Go to Homepage</button>
+        <button onclick="window.location.href='chatbot.html'">Go to Chatbot</button>
+        <button onclick="logout()">Logout</button>
+    </div>
 
-        <h2>Upload Auction Item</h2>
-        <form id="uploadForm" onsubmit="uploadItem(event)">
-            <label for="itemName">Item Name:</label>
-            <input type="text" id="itemName" required>
-            <br>
-            <label for="description">Description:</label>
-            <textarea id="description" required rows="4"></textarea>
-            <br>
-            <label for="price">Starting Price:</label>
-            <input type="number" id="price" required>
-            <br>
-            <label for="image">Item Image:</label>
-            <input type="file" id="image" accept="image/*" required>
-            <br>
-            <label for="endTime">Auction End Time:</label>
-            <input type="datetime-local" id="endTime" required>
-            <br>
-            <button type="submit">Upload Item</button>
-        </form>
+    <!-- Main content container -->
+    <div class="container">
+        <h1 id="welcomeMessage">Welcome</h1>
 
-        <div id="progressContainer">
-            <p>Uploading: <span id="progressText">0%</span></p>
-            <div id="progressBar">
-                <div id="progressFill"></div>
+        <div class="form-container">
+            <h3>Upload Auction Item</h3>
+            <form id="uploadForm" onsubmit="uploadItem(event)">
+                <label for="itemName">Item Name:</label>
+                <input type="text" id="itemName" required>
+
+                <label for="description">Description:</label>
+                <textarea id="description" required rows="4"></textarea>
+
+                <label for="price">Starting Price:</label>
+                <input type="number" id="price" required>
+
+                <label for="image">Item Image:</label>
+                <input type="file" id="image" accept="image/*" required>
+
+                <label for="endTime">Auction End Time:</label>
+                <input type="datetime-local" id="endTime" required>
+
+                <button type="submit">Upload Item</button>
+            </form>
+
+            <div id="progressContainer" style="display:none;">
+                <p>Uploading: <span id="progressText">0%</span></p>
+                <div id="progressBar">
+                    <div id="progressFill"></div>
+                </div>
             </div>
         </div>
+
+        <div class="auction-item-container">
+            <h2>Edit Your Auction Items</h2>
+            <div id="itemList"></div>
+        </div>
     </div>
-  <div class="container">
-        <h2>Edit Your Auction Items</h2>
-        <div id="itemList"></div>
-    </div>
+
     <script>
-// Ensure the user is authenticated
-checkUserAuthentication();
-auth.onAuthStateChanged((user) => {
-    if (!user) return; // If the user is not authenticated, do nothing.
+        // Ensure the user is authenticated
+        checkUserAuthentication();
+        auth.onAuthStateChanged((user) => {
+            if (!user) return;
 
-    const userId = user.uid;
-    const userRef = firebase.database().ref(`onlineAuction/users/${userId}`);
+            const userId = user.uid;
+            const userRef = firebase.database().ref(`onlineAuction/users/${userId}`);
 
-    userRef.child('username').once('value')
-        .then(snapshot => {
-            const username = snapshot.val() || user.email.split('@')[0];
-            document.getElementById('welcomeMessage').innerText = `Welcome ${username}`;
-        })
-        .catch(error => {
-            console.error("Error fetching user data:", error);
-            document.getElementById('welcomeMessage').innerText = `Welcome  ${user.email.split('@')[0]}`;
+            userRef.child('username').once('value')
+                .then(snapshot => {
+                    const username = snapshot.val() || user.email.split('@')[0];
+                    document.getElementById('welcomeMessage').innerText = `Welcome ${username}`;
+                })
+                .catch(error => {
+                    console.error("Error fetching user data:", error);
+                    document.getElementById('welcomeMessage').innerText = `Welcome  ${user.email.split('@')[0]}`;
+                });
         });
-});
-
-
 
         async function uploadItem(event) {
             event.preventDefault();
@@ -120,7 +249,6 @@ auth.onAuthStateChanged((user) => {
                 alert("Error during upload: " + error.message);
             }
         }
-
 
         // Function to load user's auction items
         function loadUserItems(userId) {

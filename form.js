@@ -225,24 +225,6 @@ document.addEventListener('DOMContentLoaded', () => {
     recommend(); // Call the recommend function 
 });
 
-// Function to search auction items based on the input text
-function searchItems() {
-    const query = document.getElementById('searchInput').value.toLowerCase(); // Get the search query
-    const items = document.querySelectorAll('.auction-item'); // Get all auction items
-
-    items.forEach(item => {
-        const itemName = item.querySelector('h3').innerText.toLowerCase(); // Get the name of the item
-        const itemDescription = item.querySelector('.description').innerText.toLowerCase(); // Get the description of the item
-        
-        // If search query matches either name or description, display the item
-        if (itemName.includes(query) || itemDescription.includes(query)) {
-            item.style.display = "block";  // Show item
-        } else {
-            item.style.display = "none";   // Hide item
-        }
-    });
-}
-
 
 //checkUserAuthentication for pages requiring login
 document.addEventListener("DOMContentLoaded", () => {

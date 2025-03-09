@@ -168,7 +168,62 @@ function checkUserAuthentication(redirectUrl = "index.html") {
         }
     });
 }
+// Fetch all auction items from Firebase and recommend a random one that's still ongoing
+async function recommend() {
+    try {
+        const auctionsRef = firebase.database().ref('onlineAuction/users');
+        const snapshot = await auctionsRef.once('value');
 
+        if (!snapshot.exists()) {
+            document.getElementById('recommendedItems').innerHTML = "No items available.";
+            return;
+        }
+
+        // Collect all ongoing auction items
+        const ongoingItems = [];
+        snapshot.forEach(userSnapshot => {
+            const userItems = userSnapshot.child('auction-items').val();
+            if (userItems) {
+                Object.values(userItems).forEach(item => {
+                    const currentTime = Date.now();
+                    if (item.endTime > currentTime) {  // Filter items that are still ongoing
+                        ongoingItems.push(item);
+                    }
+                });
+            }
+        });
+
+        if (ongoingItems.length === 0) {
+            document.getElementById('recommendedItems').innerHTML = "No ongoing auction items.";
+            return;
+        }
+
+        // Randomly pick one item from the ongoing items
+        const randomItem = ongoingItems[Math.floor(Math.random() * ongoingItems.length)];
+
+        // Display the recommended item
+        document.getElementById('recommendedItems').innerHTML = `
+            <div class="recommendation-item">
+                <h4>${randomItem.name}</h4>
+                <p>${randomItem.description}</p>
+                <p><strong>Starting Price:</strong> $${randomItem.price}</p>
+                <p><strong>Current Highest Bid:</strong> $${randomItem.highestBid}</p>
+                <p><strong>Ends at:</strong> ${new Date(randomItem.endTime).toLocaleString()}</p>
+                <img src="${randomItem.imageUrl}" alt="${randomItem.name}" style="width: 100px;">
+            </div>
+        `;
+    } catch (error) {
+        console.error("Error fetching auction items:", error);
+        document.getElementById('recommendedItems').innerHTML = "An error occurred while fetching auction items.";
+    }
+}
+
+// Ensure the recommend function is called on page load
+document.addEventListener('DOMContentLoaded', () => {
+    checkUserAuthentication(); // Check if user is logged in
+    fetchAllAuctionItems(); // Display auction items
+    recommend(); // Call the recommend function to show a random ongoing auction item
+});
 // Example: Usage of checkUserAuthentication for pages requiring login
 document.addEventListener("DOMContentLoaded", () => {
     checkUserAuthentication(); 

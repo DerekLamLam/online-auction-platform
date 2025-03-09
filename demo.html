@@ -59,111 +59,78 @@
             background-color: #c9302c;
         }
 
-        /* Section Headers */
-        h2, h3 {
-            color: #333;
-            text-align: center;
+        /* Auction Grid */
+        .auction-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
         }
 
-        /* Auction Item Container */
         .auction-item {
-            display: flex;
-            flex-direction: column;
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-            overflow: hidden;
+            padding: 15px;
+            text-align: center;
         }
 
         .auction-item img {
             width: 100%;
             height: auto;
-            border-bottom: 1px solid #ddd;
+            border-radius: 8px;
         }
 
-        .auction-item-content {
-            padding: 20px;
-        }
-
-        .auction-item-content h4 {
+        .auction-item h4 {
             font-size: 18px;
+            margin: 10px 0;
             color: #333;
         }
 
-        .auction-item-content p {
+        .auction-item p {
+            font-size: 14px;
             color: #777;
         }
 
         .auction-item-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-top: 15px;
-        }
-
-        .auction-item-footer .timer {
-            font-weight: bold;
-            color: red;
+            font-size: 16px;
+            color: #333;
         }
 
         .auction-item-footer .price {
-            font-size: 18px;
             color: #4CAF50;
         }
 
-        /* Recommendations */
-        .recommendation-container {
-            margin-top: 30px;
-            border-top: 2px solid #ccc;
-            padding-top: 20px;
-        }
-
-        .recommendation-item {
-            background-color: #f9f9f9;
-            border: 1px dashed #bbb;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .recommendation-header {
-            font-size: 20px;
+        .auction-item-footer .timer {
+            color: red;
             font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
         }
 
-        /* Responsive Design */
-        @media screen and (max-width: 768px) {
-            .auction-item {
-                flex-direction: row;
-            }
+        /* Button for navigation */
+        .logout-container button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
 
-            .auction-item-content {
-                padding: 10px;
-            }
-
-            .auction-item-footer {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .auction-item-footer .price {
-                margin-top: 10px;
-            }
+        .logout-container button:hover {
+            background-color: #218838;
         }
     </style>
 </head>
 <body>
     <div class="navbar">
-        <button onclick="window.location.href='homepage.html'">Go to Homepage</button>
+        <button onclick="window.location.href='upload.html'">Back to userpage</button>
         <button onclick="window.location.href='chatbot.html'">Go to Chatbot</button>
-        <button onclick="logout()">Logout</button>
+         <button onclick="window.location.href='chatbot.html'">Go to Chatbot</button>
     </div>
 
     <div class="logout-container">
-        <button onclick="window.location.href='upload.html'">Back to userpage</button>
+         <button onclick="logout()">Logout</button>
     </div>
 
     <!-- Recommended Section -->
@@ -174,17 +141,17 @@
         </div>
     </div>
 
-    <!-- All Auction Items -->
-    <h2>All Auction Items</h2>
-    <div id="allAuctionItems">
-        <!-- Auction items will be displayed here -->
+    <!-- All Auction Items Section -->
+    <h2 style="text-align:center;">All Auction Items</h2>
+    <div id="allAuctionItems" class="auction-grid">
+  
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             checkUserAuthentication(); // Check if user is logged in
-            fetchAllAuctionItems(); // Display auction items
-            recommend();
+            fetchAllAuctionItems(); // Display auction items dynamically
+            recommend(); // Display recommended items
         });
     </script>
 </body>

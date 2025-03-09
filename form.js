@@ -230,7 +230,6 @@ function searchItems() {
     const query = document.getElementById('searchInput').value.toLowerCase(); // Get the search query
     const items = document.querySelectorAll('.auction-item'); // Get all auction items
 
-    // Loop through each item and check if it matches the query
     items.forEach(item => {
         const itemName = item.querySelector('h3').innerText.toLowerCase(); // Get the name of the item
         const itemDescription = item.querySelector('.description').innerText.toLowerCase(); // Get the description of the item

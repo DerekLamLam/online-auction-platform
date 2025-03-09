@@ -218,13 +218,32 @@ async function recommend() {
     }
 }
 
-// Ensure the recommend function is called on page load
+
 document.addEventListener('DOMContentLoaded', () => {
-    checkUserAuthentication(); // Check if user is logged in
+    checkUserAuthentication(); // Check user is logged in
     fetchAllAuctionItems(); // Display auction items
-    recommend(); // Call the recommend function to show a random ongoing auction item
+    recommend(); // Call the recommend function 
 });
-// Example: Usage of checkUserAuthentication for pages requiring login
+
+// Function to search auction items based on the input text
+function searchItems() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const items = document.querySelectorAll('.auction-item');
+            
+            items.forEach(item => {
+                const itemName = item.querySelector('h3').innerText.toLowerCase();
+                const itemDescription = item.querySelector('.description').innerText.toLowerCase();
+                
+                // If search query matches either name or description, display the item
+                if (itemName.includes(query) || itemDescription.includes(query)) {
+                    item.style.display = "block";  // Show item
+                } else {
+                    item.style.display = "none";   // Hide item
+                }
+            });
+        }
+
+//checkUserAuthentication for pages requiring login
 document.addEventListener("DOMContentLoaded", () => {
     checkUserAuthentication(); 
 });

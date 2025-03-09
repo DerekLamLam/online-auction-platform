@@ -45,13 +45,19 @@
             background-color: #45a049;
         }
 
+        /* Logout button */
+        .logout-container {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+        }
+
         .logout-container button {
             background-color: #d9534f;
             color: white;
             border: none;
             padding: 10px 20px;
             cursor: pointer;
-            margin-top: 20px;
             font-size: 14px;
         }
 
@@ -107,8 +113,24 @@
             font-weight: bold;
         }
 
+        /* Recommended Section */
+        .recommendation-container {
+            margin-top: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .recommendation-header {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
         /* Button for navigation */
-        .logout-container button {
+        .navbar button {
             background-color: #28a745;
             color: white;
             border: none;
@@ -117,20 +139,21 @@
             font-size: 14px;
         }
 
-        .logout-container button:hover {
+        .navbar button:hover {
             background-color: #218838;
         }
+
     </style>
 </head>
 <body>
     <div class="navbar">
         <button onclick="window.location.href='upload.html'">Back to userpage</button>
         <button onclick="window.location.href='chatbot.html'">Go to Chatbot</button>
-         <button onclick="window.location.href='chatbot.html'">Go to Chatbot</button>
     </div>
 
+    <!-- Logout Button -->
     <div class="logout-container">
-         <button onclick="logout()">Logout</button>
+        <button onclick="logout()">Logout</button>
     </div>
 
     <!-- Recommended Section -->
@@ -144,7 +167,7 @@
     <!-- All Auction Items Section -->
     <h2 style="text-align:center;">All Auction Items</h2>
     <div id="allAuctionItems" class="auction-grid">
-  
+        <!-- Auction items will be displayed here -->
     </div>
 
     <script>

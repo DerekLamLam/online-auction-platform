@@ -16,10 +16,6 @@
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
         }
 
@@ -30,6 +26,7 @@
             box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 600px;
+            margin: 100px auto;
         }
 
         h1 {
@@ -72,19 +69,27 @@
         }
 
         button {
-            width: 100%;
-            padding: 12px;
+            width: 48%;
+            padding: 10px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
             transition: background-color 0.3s;
         }
 
         button:hover {
             background-color: #45a049;
+        }
+
+        .delete-button {
+            background-color: red;
+        }
+
+        .delete-button:hover {
+            background-color: #d32f2f;
         }
 
         .auction-item-container {
@@ -104,7 +109,7 @@
         }
 
         .auction-item-container .item img {
-            max-width: 100px;
+            max-width: 200px; /* Increased image size */
             margin-top: 10px;
         }
 
@@ -114,26 +119,38 @@
             right: 20px;
         }
 
-        .button-container a {
-            display: inline-block;
-            padding: 10px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border-radius: 5px;
-            text-decoration: none;
-            margin-top: 10px;
+        .top-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin: 20px;
         }
 
-        .button-container a:hover {
+        .top-buttons button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .top-buttons button:hover {
             background-color: #45a049;
         }
+
     </style>
 </head>
 <body>
+    <!-- Top buttons for navigation -->
+    <div class="top-buttons">
+        <button onclick="window.location.href='home.html'">Go to Homepage</button>
+        <button onclick="window.location.href='chatbot.html'">Go to Chatbot</button>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Main content container -->
     <div class="container">
-        <div class="logout-container">
-            <button onclick="logout()">Logout</button>
-        </div>
         <h1 id="welcomeMessage">Welcome</h1>
 
         <div class="form-container">
@@ -168,11 +185,6 @@
         <div class="auction-item-container">
             <h2>Edit Your Auction Items</h2>
             <div id="itemList"></div>
-        </div>
-
-        <div class="button-container">
-            <a href="home.html">Go to Homepage</a>
-            <a href="chatbot.html">Go to Chatbot</a>
         </div>
     </div>
 
@@ -307,40 +319,4 @@
             const endTime = new Date(document.getElementById(`endTime-${itemId}`).value).getTime();
             const imageFile = document.getElementById(`image-${itemId}`).files[0];
 
-            const itemRef = db.ref(`onlineAuction/users/${userId}/auction-items/${itemId}`);
-            
-            if (imageFile) {
-                const storageRef = firebase.storage().ref();
-                const imageRef = storageRef.child(`images/${userId}/${itemId}/${imageFile.name}`);
-                try {
-                    await imageRef.put(imageFile);
-                    const imageUrl = await imageRef.getDownloadURL();
-                    await itemRef.update({ name, description, price, endTime, imageUrl });
-                    alert("Item updated successfully with new image!");
-                } catch (error) {
-                    alert("Error updating item with image: " + error.message);
-                }
-            } else {
-                itemRef.update({ name, description, price, endTime })
-                .then(() => alert("Item updated successfully!"))
-                .catch((error) => alert("Error updating item: " + error.message));
-            }
-        }
-
-        // Function to delete an item
-        function deleteItem(userId, itemId) {
-            if (confirm("Are you sure you want to delete this item?")) {
-                const itemRef = db.ref(`onlineAuction/users/${userId}/auction-items/${itemId}`);
-                itemRef.remove()
-                .then(() => alert("Item deleted successfully!"))
-                .catch((error) => alert("Error deleting item: " + error.message));
-            }
-        }
-
-        // Load items once the user is authenticated
-        auth.onAuthStateChanged((user) => {
-            if (user) loadUserItems(user.uid);
-        });
-    </script>
-</body>
-</html>
+            const itemRef = db.ref(`onlineAuction/users/${userId}/auction-items

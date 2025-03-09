@@ -168,43 +168,6 @@ function checkUserAuthentication(redirectUrl = "index.html") {
         }
     });
 }
-// Function to fetch recommended items from Firebase and display a random one
-async function recommendRandomAuctionItem() {
-    const recommendedContainer = document.getElementById('recommendedItem');
-
-    try {
-        const auctionsRef = firebase.database().ref('onlineAuction/users');
-        const snapshot = await auctionsRef.once('value');
-
-        const availableItems = [];
-        const currentTime = new Date().getTime();
-
-        snapshot.forEach(userSnapshot => {
-            userSnapshot.child('auction-items').forEach(itemSnapshot => {
-                const item = itemSnapshot.val();
-                if (item.endTime > currentTime) {
-                    availableItems.push(item);
-                }
-            });
-        });
-
-        if (availableItems.length === 0) {
-            recommendedContainer.innerHTML = '<p>No available auctions to recommend.</p>';
-            return;
-        }
-
-        const randomItem = availableItems[Math.floor(Math.random() * availableItems.length)];
-        recommendedContainer.innerHTML = `
-            <div class=\"recommendation-item\">
-                <h3>${randomItem.name}</h3>
-                <p>Description: ${randomItem.description}</p>
-                <p>Current Highest Bid: $${randomItem.highestBid}</p>
-                <p>Remaining Time: ${new Date(randomItem.endTime).toLocaleString()}</p>
-                <img src=\"${randomItem.imageUrl}\" alt=\"Recommended Item\" width=\"150\">
-            </div>
-        `;
-    });
-}
 
 // Example: Usage of checkUserAuthentication for pages requiring login
 document.addEventListener("DOMContentLoaded", () => {

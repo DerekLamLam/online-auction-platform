@@ -319,4 +319,40 @@
             const endTime = new Date(document.getElementById(`endTime-${itemId}`).value).getTime();
             const imageFile = document.getElementById(`image-${itemId}`).files[0];
 
-            const itemRef = db.ref(`onlineAuction/users/${userId}/auction-items
+            const itemRef = db.ref(`onlineAuction/users/${userId}/auction-items/${itemId}`);
+            
+            if (imageFile) {
+                const storageRef = firebase.storage().ref();
+                const imageRef = storageRef.child(`images/${userId}/${itemId}/${imageFile.name}`);
+                try {
+                    await imageRef.put(imageFile);
+                    const imageUrl = await imageRef.getDownloadURL();
+                    await itemRef.update({ name, description, price, endTime, imageUrl });
+                    alert("Item updated successfully with new image!");
+                } catch (error) {
+                    alert("Error updating item with image: " + error.message);
+                }
+            } else {
+                itemRef.update({ name, description, price, endTime })
+                .then(() => alert("Item updated successfully!"))
+                .catch((error) => alert("Error updating item: " + error.message));
+            }
+        }
+
+        // Function to delete an item
+        function deleteItem(userId, itemId) {
+            if (confirm("Are you sure you want to delete this item?")) {
+                const itemRef = db.ref(`onlineAuction/users/${userId}/auction-items/${itemId}`);
+                itemRef.remove()
+                .then(() => alert("Item deleted successfully!"))
+                .catch((error) => alert("Error deleting item: " + error.message));
+            }
+        }
+
+        // Load items once the user is authenticated
+        auth.onAuthStateChanged((user) => {
+            if (user) loadUserItems(user.uid);
+        });
+    </script>
+</body>
+</html>

@@ -39,13 +39,6 @@
             font-size: 18px;
             font-weight: bold;
         }
-        /* Styling the search input */
-        #searchInput {
-            padding: 10px;
-            margin: 20px;
-            width: 80%;
-            font-size: 16px;
-        }
     </style>
 </head>
 <body>
@@ -53,9 +46,6 @@
         <button onclick="logout()">Logout</button>
     </div>
     <button onclick="window.location.href='upload.html'">Back to userpage</button>
-
-    <!-- Search Bar for Items -->
-    <input type="text" id="searchInput" placeholder="Search Auction Items..." oninput="searchItems()" />
 
     <!-- Recommendation Section at the Top -->
     <div class="recommendation-container">
@@ -73,80 +63,8 @@
             checkUserAuthentication(); // Check if user is logged in
             fetchAllAuctionItems(); // Display auction items
             recommend();
+            searchItems();
         });
-
-        // Function to search auction items based on the input text
-        function searchItems() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const items = document.querySelectorAll('.auction-item');
-            
-            items.forEach(item => {
-                const itemName = item.querySelector('h3').innerText.toLowerCase();
-                const itemDescription = item.querySelector('.description').innerText.toLowerCase();
-                
-                if (itemName.includes(query) || itemDescription.includes(query)) {
-                    item.style.display = "block";  // Show item
-                } else {
-                    item.style.display = "none";   // Hide item
-                }
-            });
-        }
-
-        // Function to fetch and display all auction items
-        function fetchAllAuctionItems() {
-            const allAuctionItemsRef = firebase.database().ref('onlineAuction/items');
-            allAuctionItemsRef.on('value', (snapshot) => {
-                const itemsContainer = document.getElementById('allAuctionItems');
-                itemsContainer.innerHTML = "";  // Clear previous items
-                
-                if (snapshot.exists()) {
-                    snapshot.forEach((childSnapshot) => {
-                        const item = childSnapshot.val();
-                        const itemDiv = document.createElement('div');
-                        itemDiv.classList.add('auction-item');
-                        itemDiv.innerHTML = `
-                            <h3>${item.name}</h3>
-                            <p class="description">${item.description}</p>
-                            <p>Starting Price: $${item.price}</p>
-                            <p>Current Highest Bid: $${item.highestBid}</p>
-                            <p class="timer">Ends at: ${new Date(item.endTime).toLocaleString()}</p>
-                            <img src="${item.imageUrl}" alt="${item.name}" style="width: 100px; height: auto;">
-                        `;
-                        itemsContainer.appendChild(itemDiv);
-                    });
-                } else {
-                    itemsContainer.innerHTML = "<p>No items found.</p>";
-                }
-            });
-        }
-
-        // Function to recommend items (This part can be adjusted based on your recommendation logic)
-        function recommend() {
-            const recommendedItemsContainer = document.getElementById('recommendedItems');
-            recommendedItemsContainer.innerHTML = "";  // Clear previous recommendations
-
-            // Sample static recommendation (adjust logic as needed)
-            const recommendedItem = {
-                name: "Shoes",
-                description: "This shoes is so nice",
-                price: 1236,
-                highestBid: 1236,
-                endTime: 1678920000000, // Example end time (timestamp)
-                imageUrl: "https://example.com/shoes.jpg"  // Placeholder image URL
-            };
-
-            const recommendDiv = document.createElement('div');
-            recommendDiv.classList.add('recommendation-item');
-            recommendDiv.innerHTML = `
-                <h4>${recommendedItem.name}</h4>
-                <p>${recommendedItem.description}</p>
-                <p>Starting Price: $${recommendedItem.price}</p>
-                <p>Current Highest Bid: $${recommendedItem.highestBid}</p>
-                <p>Ends at: ${new Date(recommendedItem.endTime).toLocaleString()}</p>
-                <img src="${recommendedItem.imageUrl}" alt="${recommendedItem.name}" style="width: 100px; height: auto;">
-            `;
-            recommendedItemsContainer.appendChild(recommendDiv);
-        }
     </script>
 </body>
 </html>

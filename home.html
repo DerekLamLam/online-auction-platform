@@ -52,7 +52,6 @@
         <h3 class="recommendation-header">Recommended for You</h3>
         <div id="recommendedItems">
             <!-- Recommended auction items will be displayed here -->
-            
         </div>
     </div>
 
@@ -60,14 +59,12 @@
     <div id="allAuctionItems"></div> <!-- Auction items will be displayed here -->
 
     <script>
-       
         document.addEventListener('DOMContentLoaded', () => {
             checkUserAuthentication(); // Check if user is logged in
-            recommendRandomAuctionItem();
             fetchAllAuctionItems(); // Display auction items
 
-            // Call function from form.js to start monitoring auctions
-            startAuctionMonitoring();
+    
+
            
         });
     </script>

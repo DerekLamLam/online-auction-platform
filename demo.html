@@ -83,8 +83,7 @@
 
         .auction-item img {
             width: 100%;
-            height: 200px; /* Make all images the same height */
-            object-fit: cover; /* Ensure images maintain their aspect ratio */
+            height: auto;
             border-radius: 8px;
         }
 
@@ -121,16 +120,6 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .recommendation-container img {
-            width: 250px;
-            height: 250px; /* Set the image to a larger size */
-            object-fit: cover;
-            border-radius: 8px;
         }
 
         .recommendation-header {
@@ -138,7 +127,6 @@
             font-weight: bold;
             color: #333;
             margin-bottom: 10px;
-            flex: 1;
         }
 
         /* Button for navigation */
@@ -170,10 +158,10 @@
 
     <!-- Recommended Section -->
     <div class="recommendation-container">
-        <div class="recommendation-header">
-          
+        <h3 class="recommendation-header">Recommended for You</h3>
+        <div id="recommendedItems">
+            <!-- Recommended auction items will be displayed here -->
         </div>
-
     </div>
 
     <!-- All Auction Items Section -->

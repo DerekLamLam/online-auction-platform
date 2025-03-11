@@ -81,7 +81,7 @@
           return "No auction items are currently available.";
         }
 
-        let itemList = "Available Auction Items:\n";
+        let itemList = "Auction Items:\n";
         snapshot.forEach(userSnapshot => {
           const userItems = userSnapshot.child('auction-items').val();
           if (userItems) {

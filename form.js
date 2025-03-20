@@ -168,7 +168,30 @@ function checkUserAuthentication(redirectUrl = "index.html") {
         }
     });
 }
-// Fetch all auction items from Firebase and recommend a random one that's still ongoing
+// Function to track a viewed item in Firebase under the user's profile
+async function trackViewedItem(userId, itemId) {
+    const userViewedItemsRef = firebase.database().ref(`onlineAuction/users/${userId}/viewedItems`);
+
+    // Fetch current viewed items
+    const snapshot = await userViewedItemsRef.once('value');
+    const viewedItems = snapshot.exists() ? snapshot.val() : [];
+
+    // Add the new item if it's not already in the list
+    if (!viewedItems.includes(itemId)) {
+        viewedItems.push(itemId);
+        await userViewedItemsRef.set(viewedItems);  // Store the updated list back to Firebase
+    }
+}
+
+// Function to get the list of viewed items from Firebase for the logged-in user
+async function getUserViewedItems(userId) {
+    const userViewedItemsRef = firebase.database().ref(`onlineAuction/users/${userId}/viewedItems`);
+    const snapshot = await userViewedItemsRef.once('value');
+    
+    return snapshot.exists() ? snapshot.val() : []; // Return empty array if no viewed items
+}
+
+// Function to recommend an item based on the user's interaction and ongoing items
 async function recommend() {
     try {
         const auctionsRef = firebase.database().ref('onlineAuction/users');
@@ -198,18 +221,37 @@ async function recommend() {
             return;
         }
 
-        // Randomly pick one item from the ongoing items
-        const randomItem = ongoingItems[Math.floor(Math.random() * ongoingItems.length)];
+        // Get user ID (this should be available if the user is logged in)
+        const userId = 'user123';  // Replace with actual user ID (authentication-dependent)
+
+        // Retrieve the list of viewed items from Firebase
+        const userViewedItems = await getUserViewedItems(userId);
+
+        let recommendedItem = null;
+
+        // Prioritize the items the user has viewed recently
+        if (userViewedItems && userViewedItems.length > 0) {
+            const viewedOngoingItems = ongoingItems.filter(item => userViewedItems.includes(item.id));
+            if (viewedOngoingItems.length > 0) {
+                // Recommend the most recent item the user has viewed
+                recommendedItem = viewedOngoingItems[0];  // Customize recommendation logic here
+            }
+        }
+
+        // If no viewed item, pick a random ongoing auction item
+        if (!recommendedItem) {
+            recommendedItem = ongoingItems[Math.floor(Math.random() * ongoingItems.length)];
+        }
 
         // Display the recommended item
         document.getElementById('recommendedItems').innerHTML = `
             <div class="recommendation-item">
-                <h4>${randomItem.name}</h4>
-                <p>${randomItem.description}</p>
-                <p><strong>Starting Price:</strong> $${randomItem.price}</p>
-                <p><strong>Current Highest Bid:</strong> $${randomItem.highestBid}</p>
-                <p><strong>Ends at:</strong> ${new Date(randomItem.endTime).toLocaleString()}</p>
-                <img src="${randomItem.imageUrl}" alt="${randomItem.name}" style="width: 100px;">
+                <h4>${recommendedItem.name}</h4>
+                <p>${recommendedItem.description}</p>
+                <p><strong>Starting Price:</strong> $${recommendedItem.price}</p>
+                <p><strong>Current Highest Bid:</strong> $${recommendedItem.highestBid}</p>
+                <p><strong>Ends at:</strong> ${new Date(recommendedItem.endTime).toLocaleString()}</p>
+                <img src="${recommendedItem.imageUrl}" alt="${recommendedItem.name}" style="width: 100px;">
             </div>
         `;
     } catch (error) {
@@ -218,6 +260,15 @@ async function recommend() {
     }
 }
 
+
+function viewItem(userId, item) {
+    trackViewedItem(userId, item.id);  // Assuming `item.id` is the unique identifier for the auction item
+   
+}
+
+// Sample usage of recommending:
+const item = { id: 'item123', name: 'Example Auction Item' };
+viewItem('user123', item);  // Tracks the item the user is viewing
 
 document.addEventListener('DOMContentLoaded', () => {
     checkUserAuthentication(); // Check user is logged in

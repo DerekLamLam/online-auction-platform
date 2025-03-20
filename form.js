@@ -260,15 +260,22 @@ async function recommend() {
     }
 }
 
+// Function to increment the view count for an auction item
+async function incrementViewCount(itemId) {
+    const itemRef = firebase.database().ref(`onlineAuction/auction-items/${itemId}/viewCount`);
+
+    // Use a transaction to safely increment the view count
+    await itemRef.transaction(currentCount => {
+        return (currentCount || 0) + 1; // If no count, set it to 0; otherwise, increment by 1
+    });
+}
 
 function viewItem(userId, item) {
-    trackViewedItem(userId, item.id);  // Assuming `item.id` is the unique identifier for the auction item
+    incrementViewCount(userId, item.id);  // Assuming `item.id` is the unique identifier for the auction item
    
 }
 
-// Sample usage of recommending:
-const item = { id: 'item123', name: 'Example Auction Item' };
-viewItem('user123', item);  // Tracks the item the user is viewing
+
 
 document.addEventListener('DOMContentLoaded', () => {
     checkUserAuthentication(); // Check user is logged in

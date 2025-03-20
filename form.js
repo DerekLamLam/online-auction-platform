@@ -168,6 +168,10 @@ function checkUserAuthentication(redirectUrl = "index.html") {
         }
     });
 }
+
+
+
+/////
 // Function to track a viewed item in Firebase under the user's profile
 async function trackViewedItem(userId, itemId) {
     const userViewedItemsRef = firebase.database().ref(`onlineAuction/users/${userId}/viewedItems`);
@@ -274,7 +278,7 @@ function viewItem(userId, item) {
     incrementViewCount(userId, item.id);  // Assuming `item.id` is the unique identifier for the auction item
    
 }
-
+//////
 
 
 document.addEventListener('DOMContentLoaded', () => {

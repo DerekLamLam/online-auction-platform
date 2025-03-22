@@ -224,6 +224,12 @@ function displayAuctionItems(items) {
     const allItemsContainer = document.getElementById('allAuctionItems');
     allItemsContainer.innerHTML = ''; // Clear current items
 
+    if (items.length === 0) {
+        allItemsContainer.innerHTML = 'No matching items found.'; // Show message if no items match the search
+        return;
+    }
+
+    // Loop through the filtered items and create HTML for each item
     items.forEach(item => {
         const itemDiv = document.createElement('div');
         itemDiv.classList.add('auction-item');
@@ -236,28 +242,30 @@ function displayAuctionItems(items) {
                 <span class="timer">Ends at: ${new Date(item.endTime).toLocaleString()}</span>
             </div>
         `;
-        allItemsContainer.appendChild(itemDiv);
+        allItemsContainer.appendChild(itemDiv); // Add the item div to the container
     });
 }
 
 // Search function to filter auction items based on input
 function searchAuctionItems() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
+    const query = document.getElementById('searchInput').value.toLowerCase(); // Get the search query
 
-    // Fetch all items and filter based on the search query
+    // Fetch all auction items and filter based on the search query
     const auctionsRef = firebase.database().ref('onlineAuction/auction-items');
     auctionsRef.once('value', snapshot => {
-        const items = [];
+        const filteredItems = []; // Array to store matching items
+
         snapshot.forEach(itemSnapshot => {
             const item = itemSnapshot.val();
-            // Check if item name or description includes the search query
+
+            // Check if the item name or description includes the search query (case-insensitive)
             if (item.name.toLowerCase().includes(query) || item.description.toLowerCase().includes(query)) {
-                items.push(item); // Add items that match the search query
+                filteredItems.push(item); // Add matching items to the filtered list
             }
         });
 
-        // Display the filtered items
-        displayAuctionItems(items);
+        // Call the display function to show the filtered items
+        displayAuctionItems(filteredItems);
     });
 }
 

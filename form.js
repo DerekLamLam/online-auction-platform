@@ -159,6 +159,7 @@ function logout() {
             alert("An error occurred while logging out. Please try again.");
         });
 }
+
 // Check if user is authenticated 
 function checkUserAuthentication(redirectUrl = "index.html") {
     auth.onAuthStateChanged((user) => {
@@ -170,35 +171,9 @@ function checkUserAuthentication(redirectUrl = "index.html") {
 }
 
 
-
-/////
-// Function to track a viewed item in Firebase under the user's profile
-async function trackViewedItem(userId, itemId) {
-    const userViewedItemsRef = firebase.database().ref(`onlineAuction/users/${userId}/viewedItems`);
-
-    // Fetch current viewed items
-    const snapshot = await userViewedItemsRef.once('value');
-    const viewedItems = snapshot.exists() ? snapshot.val() : [];
-
-    // Add the new item if it's not already in the list
-    if (!viewedItems.includes(itemId)) {
-        viewedItems.push(itemId);
-        await userViewedItemsRef.set(viewedItems);  // Store the updated list back to Firebase
-    }
-}
-
-// Function to get the list of viewed items from Firebase for the logged-in user
-async function getUserViewedItems(userId) {
-    const userViewedItemsRef = firebase.database().ref(`onlineAuction/users/${userId}/viewedItems`);
-    const snapshot = await userViewedItemsRef.once('value');
-    
-    return snapshot.exists() ? snapshot.val() : []; // Return empty array if no viewed items
-}
-
-// Function to recommend an item based on the user's interaction and ongoing items
 async function recommend() {
     try {
-        const auctionsRef = firebase.database().ref('onlineAuction/users');
+        const auctionsRef = firebase.database().ref('onlineAuction/auction-items');
         const snapshot = await auctionsRef.once('value');
 
         if (!snapshot.exists()) {
@@ -206,17 +181,13 @@ async function recommend() {
             return;
         }
 
-        // Collect all ongoing auction items
+        // Collect ongoing auction items
         const ongoingItems = [];
-        snapshot.forEach(userSnapshot => {
-            const userItems = userSnapshot.child('auction-items').val();
-            if (userItems) {
-                Object.values(userItems).forEach(item => {
-                    const currentTime = Date.now();
-                    if (item.endTime > currentTime) {  // Filter items that are still ongoing
-                        ongoingItems.push(item);
-                    }
-                });
+        snapshot.forEach(itemSnapshot => {
+            const item = itemSnapshot.val();
+            const currentTime = Date.now();
+            if (item.endTime > currentTime) {
+                ongoingItems.push(item);
             }
         });
 
@@ -225,37 +196,21 @@ async function recommend() {
             return;
         }
 
-        // Get user ID (this should be available if the user is logged in)
-        const userId = 'user123';  // Replace with actual user ID (authentication-dependent)
+        // Sort items by view count (descending) for trending items
+        ongoingItems.sort((a, b) => b.viewCount - a.viewCount);
 
-        // Retrieve the list of viewed items from Firebase
-        const userViewedItems = await getUserViewedItems(userId);
-
-        let recommendedItem = null;
-
-        // Prioritize the items the user has viewed recently
-        if (userViewedItems && userViewedItems.length > 0) {
-            const viewedOngoingItems = ongoingItems.filter(item => userViewedItems.includes(item.id));
-            if (viewedOngoingItems.length > 0) {
-                // Recommend the most recent item the user has viewed
-                recommendedItem = viewedOngoingItems[0];  // Customize recommendation logic here
-            }
-        }
-
-        // If no viewed item, pick a random ongoing auction item
-        if (!recommendedItem) {
-            recommendedItem = ongoingItems[Math.floor(Math.random() * ongoingItems.length)];
-        }
+        // Pick the most viewed item
+        const mostViewedItem = ongoingItems[0];
 
         // Display the recommended item
         document.getElementById('recommendedItems').innerHTML = `
             <div class="recommendation-item">
-                <h4>${recommendedItem.name}</h4>
-                <p>${recommendedItem.description}</p>
-                <p><strong>Starting Price:</strong> $${recommendedItem.price}</p>
-                <p><strong>Current Highest Bid:</strong> $${recommendedItem.highestBid}</p>
-                <p><strong>Ends at:</strong> ${new Date(recommendedItem.endTime).toLocaleString()}</p>
-                <img src="${recommendedItem.imageUrl}" alt="${recommendedItem.name}" style="width: 100px;">
+                <h4>${mostViewedItem.name}</h4>
+                <p>${mostViewedItem.description}</p>
+                <p><strong>Starting Price:</strong> $${mostViewedItem.price}</p>
+                <p><strong>Current Highest Bid:</strong> $${mostViewedItem.highestBid}</p>
+                <p><strong>Ends at:</strong> ${new Date(mostViewedItem.endTime).toLocaleString()}</p>
+                <img src="${mostViewedItem.imageUrl}" alt="${mostViewedItem.name}" style="width: 100px;">
             </div>
         `;
     } catch (error) {
@@ -263,22 +218,6 @@ async function recommend() {
         document.getElementById('recommendedItems').innerHTML = "An error occurred while fetching auction items.";
     }
 }
-
-// Function to increment the view count for an auction item
-async function incrementViewCount(itemId) {
-    const itemRef = firebase.database().ref(`onlineAuction/auction-items/${itemId}/viewCount`);
-
-    // Use a transaction to safely increment the view count
-    await itemRef.transaction(currentCount => {
-        return (currentCount || 0) + 1; // If no count, set it to 0; otherwise, increment by 1
-    });
-}
-
-function viewItem(userId, item) {
-    incrementViewCount(userId, item.id);  // Assuming `item.id` is the unique identifier for the auction item
-   
-}
-//////
 
 
 document.addEventListener('DOMContentLoaded', () => {

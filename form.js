@@ -170,7 +170,32 @@ function checkUserAuthentication(redirectUrl = "index.html") {
     });
 }
 
+// Function to increment viewCount for a specific auction item
+async function incrementViewCount(itemId) {
+    const itemRef = firebase.database().ref(`onlineAuction/auction-items/${itemId}/viewCount`);
 
+    // Use a transaction to safely increment the view count
+    await itemRef.transaction(currentCount => {
+        return (currentCount || 0) + 1;  // Increment by 1 if it exists, or start from 0
+    });
+}
+
+// Function to view an item and increment the viewCount
+async function viewItem(itemId) {
+    // Increment the view count when the item is viewed
+    await incrementViewCount(itemId);
+
+    // Fetch the item details and display it
+    const itemRef = firebase.database().ref(`onlineAuction/auction-items/${itemId}`);
+    itemRef.once('value', snapshot => {
+        const item = snapshot.val();
+        if (item) {
+            document.getElementById("itemName").innerText = item.name;
+            document.getElementById("itemDescription").innerText = item.description;
+            document.getElementById("viewCount").innerText = `Views: ${item.viewCount}`;
+        }
+    });
+}
 async function recommend() {
     try {
         const auctionsRef = firebase.database().ref('onlineAuction/auction-items');

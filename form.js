@@ -218,7 +218,7 @@ async function recommend() {
     }
 }
 
-///////
+
 // Function to display auction items dynamically
 function displayAuctionItems(items) {
     const allItemsContainer = document.getElementById('allAuctionItems');
@@ -248,17 +248,17 @@ function displayAuctionItems(items) {
 
 // Search function to filter auction items based on input
 function searchAuctionItems() {
-    const query = document.getElementById('searchInput').value.toLowerCase(); // Get the search query
+    const query = document.getElementById('searchInput').value.trim().toLowerCase(); // Get the search query and ensure it's trimmed and lowercased
 
-    // Fetch all auction items and filter based on the search query
+    // Fetch all auction items and filter them based on the search query
     const auctionsRef = firebase.database().ref('onlineAuction/auction-items');
     auctionsRef.once('value', snapshot => {
-        const filteredItems = []; // Array to store matching items
+        const filteredItems = [];
 
         snapshot.forEach(itemSnapshot => {
             const item = itemSnapshot.val();
 
-            // Check if the item name or description includes the search query (case-insensitive)
+            // Check if the item name or description contains the search query (case-insensitive)
             if (item.name.toLowerCase().includes(query) || item.description.toLowerCase().includes(query)) {
                 filteredItems.push(item); // Add matching items to the filtered list
             }

@@ -224,6 +224,53 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAllAuctionItems(); // Display auction items
     recommend(); // Call the recommend function to show a random ongoing auction item
 });
+
+///
+
+// Function to display auction items dynamically
+function displayAuctionItems(items) {
+    const allItemsContainer = document.getElementById('allAuctionItems');
+    allItemsContainer.innerHTML = ''; // Clear current items
+
+    items.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.classList.add('auction-item');
+        itemDiv.innerHTML = `
+            <img src="${item.imageUrl}" alt="${item.name}">
+            <h4>${item.name}</h4>
+            <p>${item.description}</p>
+            <div class="auction-item-footer">
+                <span class="price">Starting Price: $${item.price}</span>
+                <span class="timer">Ends at: ${new Date(item.endTime).toLocaleString()}</span>
+            </div>
+        `;
+        allItemsContainer.appendChild(itemDiv);
+    });
+}
+
+// Search function to filter auction items based on input
+function searchAuctionItems() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    
+    // Fetch all items again (this could be optimized if you store them once and filter locally)
+    const auctionsRef = firebase.database().ref('onlineAuction/auction-items');
+    auctionsRef.once('value', snapshot => {
+        const items = [];
+        snapshot.forEach(itemSnapshot => {
+            const item = itemSnapshot.val();
+            if (item.name.toLowerCase().includes(query) || item.description.toLowerCase().includes(query)) {
+                items.push(item); // Add items that match the search query
+            }
+        });
+
+        // Display the filtered items
+        displayAuctionItems(items);
+    });
+}
+/////
+
+
+
 // Example: Usage of checkUserAuthentication for pages requiring login
 document.addEventListener("DOMContentLoaded", () => {
     checkUserAuthentication(); 

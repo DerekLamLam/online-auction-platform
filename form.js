@@ -218,15 +218,7 @@ async function recommend() {
     }
 }
 
-// Ensure the recommend function is called on page load
-document.addEventListener('DOMContentLoaded', () => {
-    checkUserAuthentication(); // Check if user is logged in
-    fetchAllAuctionItems(); // Display auction items
-    recommend(); // Call the recommend function to show a random ongoing auction item
-});
-
-///
-
+///////
 // Function to display auction items dynamically
 function displayAuctionItems(items) {
     const allItemsContainer = document.getElementById('allAuctionItems');
@@ -251,13 +243,14 @@ function displayAuctionItems(items) {
 // Search function to filter auction items based on input
 function searchAuctionItems() {
     const query = document.getElementById('searchInput').value.toLowerCase();
-    
-    // Fetch all items again (this could be optimized if you store them once and filter locally)
+
+    // Fetch all items and filter based on the search query
     const auctionsRef = firebase.database().ref('onlineAuction/auction-items');
     auctionsRef.once('value', snapshot => {
         const items = [];
         snapshot.forEach(itemSnapshot => {
             const item = itemSnapshot.val();
+            // Check if item name or description includes the search query
             if (item.name.toLowerCase().includes(query) || item.description.toLowerCase().includes(query)) {
                 items.push(item); // Add items that match the search query
             }

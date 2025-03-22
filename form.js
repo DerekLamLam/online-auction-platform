@@ -159,7 +159,6 @@ function logout() {
             alert("An error occurred while logging out. Please try again.");
         });
 }
-
 // Check if user is authenticated 
 function checkUserAuthentication(redirectUrl = "index.html") {
     auth.onAuthStateChanged((user) => {
@@ -169,36 +168,10 @@ function checkUserAuthentication(redirectUrl = "index.html") {
         }
     });
 }
-
-// Function to increment viewCount for a specific auction item
-async function incrementViewCount(itemId) {
-    const itemRef = firebase.database().ref(`onlineAuction/auction-items/${itemId}/viewCount`);
-
-    // Use a transaction to safely increment the view count
-    await itemRef.transaction(currentCount => {
-        return (currentCount || 0) + 1;  // Increment by 1 if it exists, or start from 0
-    });
-}
-
-// Function to view an item and increment the viewCount
-async function viewItem(itemId) {
-    // Increment the view count when the item is viewed
-    await incrementViewCount(itemId);
-
-    // Fetch the item details and display it
-    const itemRef = firebase.database().ref(`onlineAuction/auction-items/${itemId}`);
-    itemRef.once('value', snapshot => {
-        const item = snapshot.val();
-        if (item) {
-            document.getElementById("itemName").innerText = item.name;
-            document.getElementById("itemDescription").innerText = item.description;
-            document.getElementById("viewCount").innerText = `Views: ${item.viewCount}`;
-        }
-    });
-}
+// Fetch all auction items from Firebase and recommend a random one that's still ongoing
 async function recommend() {
     try {
-        const auctionsRef = firebase.database().ref('onlineAuction/auction-items');
+        const auctionsRef = firebase.database().ref('onlineAuction/users');
         const snapshot = await auctionsRef.once('value');
 
         if (!snapshot.exists()) {
@@ -206,13 +179,17 @@ async function recommend() {
             return;
         }
 
-        // Collect ongoing auction items
+        // Collect all ongoing auction items
         const ongoingItems = [];
-        snapshot.forEach(itemSnapshot => {
-            const item = itemSnapshot.val();
-            const currentTime = Date.now();
-            if (item.endTime > currentTime) {
-                ongoingItems.push(item);
+        snapshot.forEach(userSnapshot => {
+            const userItems = userSnapshot.child('auction-items').val();
+            if (userItems) {
+                Object.values(userItems).forEach(item => {
+                    const currentTime = Date.now();
+                    if (item.endTime > currentTime) {  // Filter items that are still ongoing
+                        ongoingItems.push(item);
+                    }
+                });
             }
         });
 
@@ -221,21 +198,18 @@ async function recommend() {
             return;
         }
 
-        // Sort items by view count (descending) for trending items
-        ongoingItems.sort((a, b) => b.viewCount - a.viewCount);
-
-        // Pick the most viewed item
-        const mostViewedItem = ongoingItems[0];
+        // Randomly pick one item from the ongoing items
+        const randomItem = ongoingItems[Math.floor(Math.random() * ongoingItems.length)];
 
         // Display the recommended item
         document.getElementById('recommendedItems').innerHTML = `
             <div class="recommendation-item">
-                <h4>${mostViewedItem.name}</h4>
-                <p>${mostViewedItem.description}</p>
-                <p><strong>Starting Price:</strong> $${mostViewedItem.price}</p>
-                <p><strong>Current Highest Bid:</strong> $${mostViewedItem.highestBid}</p>
-                <p><strong>Ends at:</strong> ${new Date(mostViewedItem.endTime).toLocaleString()}</p>
-                <img src="${mostViewedItem.imageUrl}" alt="${mostViewedItem.name}" style="width: 100px;">
+                <h4>${randomItem.name}</h4>
+                <p>${randomItem.description}</p>
+                <p><strong>Starting Price:</strong> $${randomItem.price}</p>
+                <p><strong>Current Highest Bid:</strong> $${randomItem.highestBid}</p>
+                <p><strong>Ends at:</strong> ${new Date(randomItem.endTime).toLocaleString()}</p>
+                <img src="${randomItem.imageUrl}" alt="${randomItem.name}" style="width: 100px;">
             </div>
         `;
     } catch (error) {
@@ -244,15 +218,13 @@ async function recommend() {
     }
 }
 
-
+// Ensure the recommend function is called on page load
 document.addEventListener('DOMContentLoaded', () => {
-    checkUserAuthentication(); // Check user is logged in
+    checkUserAuthentication(); // Check if user is logged in
     fetchAllAuctionItems(); // Display auction items
-    recommend(); // Call the recommend function 
+    recommend(); // Call the recommend function to show a random ongoing auction item
 });
-
-
-//checkUserAuthentication for pages requiring login
+// Example: Usage of checkUserAuthentication for pages requiring login
 document.addEventListener("DOMContentLoaded", () => {
     checkUserAuthentication(); 
 });

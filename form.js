@@ -267,8 +267,15 @@ function searchAuctionItems() {
         displayAuctionItems(items);
     });
 }
-/////
 
+// Clear the search input and show all items again
+function clearSearch() {
+    // Clear the search input field
+    document.getElementById('searchInput').value = '';
+    
+    // Fetch and display all items again
+    fetchAllAuctionItems();
+}
 
 
 // Example: Usage of checkUserAuthentication for pages requiring login

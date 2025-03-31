@@ -246,21 +246,34 @@ function displayAuctionItems(items) {
     });
 }
 
+
 // Search function to filter auction items based on input
 function searchAuctionItems() {
     const query = document.getElementById('searchInput').value.trim().toLowerCase(); // Get the search query and ensure it's trimmed and lowercased
 
-    // Fetch all auction items and filter them based on the search query
-    const auctionsRef = firebase.database().ref('onlineAuction/auction-items');
-    auctionsRef.once('value', snapshot => {
+    // Fetch all auction items from the correct Firebase path and filter them based on the search query
+    const usersRef = firebase.database().ref('onlineAuction/users');
+    usersRef.once('value', snapshot => {
         const filteredItems = [];
 
-        snapshot.forEach(itemSnapshot => {
-            const item = itemSnapshot.val();
+        // Loop through each user
+        snapshot.forEach(userSnapshot => {
+            const userUID = userSnapshot.key;
+            const userItems = userSnapshot.child('auction-items').val(); // Get auction items for this user
 
-            // Check if the item name or description contains the search query (case-insensitive)
-            if (item.name.toLowerCase().includes(query) || item.description.toLowerCase().includes(query)) {
-                filteredItems.push(item); // Add matching items to the filtered list
+            if (userItems) {
+                // Loop through each item under this user
+                Object.entries(userItems).forEach(([itemID, item]) => {
+                    // Check if the item name or description contains the search query (case-insensitive)
+                    if (item.name.toLowerCase().includes(query) || item.description.toLowerCase().includes(query)) {
+                        // Add userUID and itemID to the item object for reference (useful for bidding later)
+                        filteredItems.push({
+                            ...item,
+                            userUID,
+                            itemID
+                        });
+                    }
+                });
             }
         });
 

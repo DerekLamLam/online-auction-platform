@@ -12,11 +12,58 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-storage-compat.js"></script>
     <script src="form.js"></script>
 
+    <!-- Link to Google Fonts for a clean, modern font (same as demo.html) -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+            font-family: 'Roboto', sans-serif; /* Updated to match demo.html */
+            background-color: #f4f7fc; /* Updated to match demo.html */
             margin: 0;
+        }
+
+        /* Navigation Bar (same as demo.html and chatbot.html) */
+        .navbar {
+            background-color: #1e2a3b;
+            color: #fff;
+            padding: 15px;
+            text-align: right;
+        }
+
+        .navbar button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+            border-radius: 5px;
+        }
+
+        .navbar button:hover {
+            background-color: #45a049;
+        }
+
+        /* Logout button (already styled correctly) */
+        .logout-container {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+        }
+
+        .logout-container button {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+
+        .logout-container button:hover {
+            background-color: #c9302c;
         }
 
         .container {
@@ -24,9 +71,9 @@
             padding: 40px;
             border-radius: 10px;
             box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 600px;
-            margin: 100px auto;
+            width: 90%; /* Use percentage for responsiveness */
+            max-width: 800px; /* Increased from 600px to 800px for more space */
+            margin: 80px auto; /* Adjusted margin to account for navbar */
         }
 
         h1 {
@@ -44,6 +91,7 @@
             display: block;
             font-weight: bold;
             margin-bottom: 5px;
+            color: #333;
         }
 
         .form-container input,
@@ -55,6 +103,7 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 16px;
+            box-sizing: border-box; /* Ensure padding doesn't affect width */
         }
 
         .form-container textarea {
@@ -98,6 +147,7 @@
 
         .auction-item-container h2 {
             margin-top: 20px;
+            color: #333;
         }
 
         .auction-item-container .item {
@@ -109,62 +159,83 @@
         }
 
         .auction-item-container .item img {
-            max-width: 200px; /* Increased image size */
+            max-width: 200px;
             margin-top: 10px;
         }
 
-        /* Logout button (same as demo.html and chatbot.html) */
-        .logout-container {
-            position: fixed;
-            top: 15px;
-            left: 15px;
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                padding: 20px;
+                margin: 60px auto;
+            }
+
+            .form-container input,
+            .form-container textarea,
+            .form-container select {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            button {
+                font-size: 12px;
+                padding: 8px;
+            }
+
+            .navbar button {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+
+            .logout-container button {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
         }
 
-        .logout-container button {
-            background-color: #d9534f; /* Red color */
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-size: 14px;
-            border-radius: 5px;
-        }
+        @media (max-width: 480px) {
+            .container {
+                width: 98%;
+                padding: 15px;
+                margin: 50px auto;
+            }
 
-        .logout-container button:hover {
-            background-color: #c9302c; /* Darker red for hover */
-        }
+            .form-container input,
+            .form-container textarea,
+            .form-container select {
+                font-size: 12px;
+                padding: 8px;
+            }
 
-        .top-buttons {
-            display: flex;
-            justify-content: flex-end;
-            margin: 20px;
-        }
+            button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
 
-        .top-buttons button {
-            padding: 10px 20px;
-            background-color: #2196F3; /* Blue color */
-            color: white;
-            border: none;
-            border-radius: 5px;
-            margin-left: 10px;
-            cursor: pointer;
-        }
+            .button-container {
+                flex-direction: column;
+            }
 
-        .top-buttons button:hover {
-            background-color: #1976D2; /* Darker blue for hover */
+            .navbar button {
+                display: block;
+                width: 100%;
+                margin: 5px 0;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Logout Button (moved to a separate container) -->
+    <!-- Logout Button -->
     <div class="logout-container">
         <button onclick="logout()">Logout</button>
     </div>
 
-    <!-- Top buttons for navigation (excluding logout) -->
-    <div class="top-buttons">
+    <!-- Navigation Bar (replaced .top-buttons) -->
+    <div class="navbar">
         <button onclick="window.location.href='home.html'">HomePage</button>
         <button onclick="window.location.href='chatbot.html'">ChatbotPage</button>
+        <button onclick="window.location.href='all_auctions.html'">All Auctions</button> <!-- Added to match other pages -->
     </div>
 
     <!-- Main content container -->
@@ -211,7 +282,7 @@
         function showLoginAlert() {
             if (!localStorage.getItem("alertShown")) {
                 alert("You must be logged in to access this page.");
-                localStorage.setItem("alertShown", "true"); // Prevent multiple alerts
+                localStorage.setItem("alertShown", "true");
             }
         }
 
@@ -219,7 +290,7 @@
         function logout() {
             firebase.auth().signOut().then(() => {
                 alert("You have been logged out successfully.");
-                window.location.href = "index.html"; // Redirect to login page
+                window.location.href = "index.html";
             }).catch((error) => {
                 console.error("Error logging out: ", error);
             });
@@ -229,8 +300,8 @@
         function checkUserAuthentication() {
             firebase.auth().onAuthStateChanged((user) => {
                 if (!user) {
-                    showLoginAlert(); // Show login alert if not logged in
-                    window.location.href = "index.html"; // Redirect to login page if not logged in
+                    showLoginAlert();
+                    window.location.href = "index.html";
                 } else {
                     const userId = user.uid;
                     const userRef = firebase.database().ref(`onlineAuction/users/${userId}`);
@@ -242,13 +313,13 @@
                         })
                         .catch(error => {
                             console.error("Error fetching user data:", error);
-                            document.getElementById('welcomeMessage').innerText = `Welcome  ${user.email.split('@')[0]}`;
+                            document W.getElementById('welcomeMessage').innerText = `Welcome  ${user.email.split('@')[0]}`;
                         });
                 }
             });
         }
 
-        checkUserAuthentication(); // Ensure authentication on page load
+        checkUserAuthentication();
 
         // Handle item upload
         async function uploadItem(event) {
@@ -300,7 +371,7 @@
             const userItemsRef = db.ref(`onlineAuction/users/${userId}/auction-items`);
             userItemsRef.on('value', (snapshot) => {
                 const itemList = document.getElementById('itemList');
-                itemList.innerHTML = ''; // Clear existing items
+                itemList.innerHTML = '';
 
                 if (!snapshot.exists()) {
                     itemList.innerHTML = "<p>No items found.</p>";

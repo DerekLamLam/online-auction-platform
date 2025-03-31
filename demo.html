@@ -1,315 +1,402 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Online Auction Chatbot</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Userpage</title>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-storage-compat.js"></script>
+    <script src="form.js"></script>
 
-  <!-- Link to external JS file (form.js) -->
-  <script src="form.js" defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+        }
 
-  <!-- Link to Google Fonts for a clean, modern font (same as demo.html) -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 100px auto;
+        }
 
-  <style>
-    body {
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f7fc; /* Same background color as demo.html */
-    }
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
 
-    /* Header and Navigation (same as demo.html) */
-    .navbar {
-      background-color: #1e2a3b;
-      color: #fff;
-      padding: 15px;
-      text-align: right;
-    }
+        .form-container {
+            margin-bottom: 20px;
+        }
 
-    .navbar button {
-      background-color: #4CAF50;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      margin-left: 10px;
-    }
+        .form-container label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
 
-    .navbar button:hover {
-      background-color: #45a049;
-    }
+        .form-container input,
+        .form-container textarea,
+        .form-container select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
 
-    /* Logout button (same as demo.html) */
-    .logout-container {
-      position: fixed;
-      top: 15px;
-      left: 15px;
-    }
+        .form-container textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
 
-    .logout-container button {
-      background-color: #d9534f;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      cursor: pointer;
-      font-size: 14px;
-    }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
 
-    .logout-container button:hover {
-      background-color: #c9302c;
-    }
+        button {
+            width: 48%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
 
-    /* Chatbot Container */
-    .chatbot-container {
-      max-width: 600px;
-      margin: 30px auto;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Same shadow as demo.html */
-      padding: 20px;
-    }
+        button:hover {
+            background-color: #45a049;
+        }
 
-    h1 {
-      text-align: center;
-      color: #333;
-      font-size: 24px;
-      margin-bottom: 20px;
-    }
+        .delete-button {
+            background-color: red;
+        }
 
-    /* Chat Box */
-    #chat-box {
-      height: 400px;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      overflow-y: auto;
-      padding: 15px;
-      background-color: #fafafa;
-      margin-bottom: 20px;
-    }
+        .delete-button:hover {
+            background-color: #d32f2f;
+        }
 
-    /* Message Styling */
-    .message {
-      margin: 10px 0;
-      display: flex;
-      align-items: flex-start;
-    }
+        .auction-item-container {
+            margin-top: 20px;
+        }
 
-    .user-msg, .bot-msg {
-      max-width: 70%;
-      padding: 10px 15px;
-      border-radius: 15px;
-      line-height: 1.4;
-      word-wrap: break-word;
-    }
+        .auction-item-container h2 {
+            margin-top: 20px;
+        }
 
-    .user-msg {
-      background-color: #4CAF50; /* Same green as buttons in demo.html */
-      color: white;
-      margin-left: auto;
-      border-bottom-right-radius: 5px;
-    }
+        .auction-item-container .item {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+        }
 
-    .bot-msg {
-      background-color: #e0e0e0;
-      color: #333;
-      margin-right: auto;
-      border-bottom-left-radius: 5px;
-    }
+        .auction-item-container .item img {
+            max-width: 200px; /* Increased image size */
+            margin-top: 10px;
+        }
 
-    /* Input Area */
-    .input-container {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-    }
+        /* Logout button (same as demo.html and chatbot.html) */
+        .logout-container {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+        }
 
-    input[type="text"] {
-      width: 70%;
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #e0e0e0;
-      border-radius: 5px;
-      outline: none;
-    }
+        .logout-container button {
+            background-color: #d9534f; /* Red color */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+        }
 
-    input[type="text"]:focus {
-      border-color: #4CAF50;
-    }
+        .logout-container button:hover {
+            background-color: #c9302c; /* Darker red for hover */
+        }
 
-    button {
-      background-color: #4CAF50; /* Same green as demo.html buttons */
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-    }
+        .top-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin: 20px;
+        }
 
-    button:hover {
-      background-color: #45a049;
-    }
+        .top-buttons button {
+            padding: 10px 20px;
+            background-color: #2196F3; /* Blue color */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
 
-    /* Responsive Design */
-    @media (max-width: 600px) {
-      .chatbot-container {
-        margin: 20px 10px;
-        padding: 15px;
-      }
-
-      #chat-box {
-        height: 300px;
-      }
-
-      input[type="text"] {
-        width: 60%;
-      }
-    }
-  </style>
+        .top-buttons button:hover {
+            background-color: #1976D2; /* Darker blue for hover */
+        }
+    </style>
 </head>
 <body>
-  <!-- Navigation Bar (same as demo.html) -->
-  <div class="navbar">
-    <button onclick="window.location.href='upload.html'">UserPage</button>
-    <button onclick="window.location.href='home.html'">HomePage</button>
-  </div>
-
-  <!-- Logout Button (same as demo.html) -->
-  <div class="logout-container">
-    <button onclick="logout()">Logout</button>
-  </div>
-
-  <!-- Chatbot Section -->
-  <div class="chatbot-container">
-    <h1>Online Auction Chatbot</h1>
-    <div id="chat-box"></div>
-    <div class="input-container">
-      <input type="text" id="user-input" placeholder="Ask something..." />
-      <button onclick="sendMessage()">Send</button>
+    <!-- Logout Button (moved to a separate container) -->
+    <div class="logout-container">
+        <button onclick="logout()">Logout</button>
     </div>
-  </div>
 
-  <script>
-    // Function to send user messages
-    function sendMessage() {
-      const userInput = document.getElementById("user-input").value.trim();
-      if (!userInput) return;
+    <!-- Top buttons for navigation (excluding logout) -->
+    <div class="top-buttons">
+        <button onclick="window.location.href='home.html'">HomePage</button>
+        <button onclick="window.location.href='chatbot.html'">ChatbotPage</button>
+    </div>
 
-      displayMessage(userInput, 'user'); // Display user message
-      document.getElementById("user-input").value = ''; // Clear input
-      handleBotResponse(userInput); // Handle bot response
-    }
+    <!-- Main content container -->
+    <div class="container">
+        <h1 id="welcomeMessage">Welcome</h1>
 
-    // Function to handle bot responses
-    async function handleBotResponse(userMessage) {
-      let botResponse = "Sorry, I didn't understand that. Type 'help' to see available commands.";
+        <div class="form-container">
+            <h3>Upload Auction Item</h3>
+            <form id="uploadForm" onsubmit="uploadItem(event)">
+                <label for="itemName">Item Name:</label>
+                <input type="text" id="itemName" required>
 
-      if (userMessage.toLowerCase() === "list auctions") {
-        botResponse = await listAvailableItems();
-      } else if (userMessage.toLowerCase().startsWith("search")) {
-        const query = userMessage.substring(7).trim(); // Extract the search term
-        botResponse = await searchAuctionItem(query);
-      } else if (userMessage.toLowerCase() === "help") {
-        botResponse = getHelpMessage();
-      } else if (userMessage.toLowerCase() === "hello" || userMessage.toLowerCase() === "hi") {
-        botResponse = "Hello! How can I assist you today?";
-      }
+                <label for="description">Description:</label>
+                <textarea id="description" required rows="4"></textarea>
 
-      displayMessage(botResponse, 'bot'); // Display bot response
-    }
+                <label for="price">Starting Price:</label>
+                <input type="number" id="price" required>
 
-    // Function to display a message in the chat box
-    function displayMessage(message, sender) {
-      const chatBox = document.getElementById("chat-box");
-      const messageDiv = document.createElement("div");
-      messageDiv.classList.add("message", sender === 'user' ? 'user-msg' : 'bot-msg');
-      messageDiv.textContent = message;
-      chatBox.appendChild(messageDiv);
-      chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
-    }
+                <label for="image">Item Image:</label>
+                <input type="file" id="image" accept="image/*" required>
 
-    // Function to list available auction items
-    async function listAvailableItems() {
-      try {
-        const auctionsRef = db.ref('onlineAuction/users');
-        const snapshot = await auctionsRef.once('value');
+                <label for="endTime">Auction End Time:</label>
+                <input type="datetime-local" id="endTime" required>
 
-        if (!snapshot.exists()) {
-          return "No auction items are currently available.";
+                <button type="submit">Upload Item</button>
+            </form>
+
+            <div id="progressContainer" style="display:none;">
+                <p>Uploading: <span id="progressText">0%</span></p>
+                <div id="progressBar">
+                    <div id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="auction-item-container">
+            <h2>Edit Your Auction Items</h2>
+            <div id="itemList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Function to show alert when the user is not logged in
+        function showLoginAlert() {
+            if (!localStorage.getItem("alertShown")) {
+                alert("You must be logged in to access this page.");
+                localStorage.setItem("alertShown", "true"); // Prevent multiple alerts
+            }
         }
 
-        let itemList = "Auction Items:\n";
-        snapshot.forEach(userSnapshot => {
-          const userItems = userSnapshot.child('auction-items').val();
-          if (userItems) {
-            Object.values(userItems).forEach(item => {
-              itemList += `- ${item.name}: Current Bid $${item.highestBid}, Ends at ${new Date(item.endTime).toLocaleString()}\n`;
+        // Function to handle logout
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                alert("You have been logged out successfully.");
+                window.location.href = "index.html"; // Redirect to login page
+            }).catch((error) => {
+                console.error("Error logging out: ", error);
             });
-          }
-        });
-
-        return itemList.trim() || "No auction items found.";
-      } catch (error) {
-        console.error("Error fetching auction items:", error);
-        return "Sorry, I couldn't retrieve the auction items. Please try again later.";
-      }
-    }
-
-    // Function to search for a specific auction item by name
-    async function searchAuctionItem(query) {
-      try {
-        if (!query) {
-          return "Please provide an item name to search.";
         }
 
-        const auctionsRef = db.ref('onlineAuction/users');
-        const snapshot = await auctionsRef.once('value');
+        // Ensure user is authenticated
+        function checkUserAuthentication() {
+            firebase.auth().onAuthStateChanged((user) => {
+                if (!user) {
+                    showLoginAlert(); // Show login alert if not logged in
+                    window.location.href = "index.html"; // Redirect to login page if not logged in
+                } else {
+                    const userId = user.uid;
+                    const userRef = firebase.database().ref(`onlineAuction/users/${userId}`);
 
-        if (!snapshot.exists()) {
-          return "No auction items are currently available.";
-        }
-
-        let foundItem = null;
-        snapshot.forEach(userSnapshot => {
-          const userItems = userSnapshot.child('auction-items').val();
-          if (userItems) {
-            Object.values(userItems).forEach(item => {
-              if (item.name.toLowerCase() === query.toLowerCase()) {
-                foundItem = `- ${item.name}: Current Bid $${item.highestBid}, Ends at ${new Date(item.endTime).toLocaleString()}`;
-              }
+                    userRef.child('username').once('value')
+                        .then(snapshot => {
+                            const username = snapshot.val() || user.email.split('@')[0];
+                            document.getElementById('welcomeMessage').innerText = `Welcome ${username}`;
+                        })
+                        .catch(error => {
+                            console.error("Error fetching user data:", error);
+                            document.getElementById('welcomeMessage').innerText = `Welcome  ${user.email.split('@')[0]}`;
+                        });
+                }
             });
-          }
+        }
+
+        checkUserAuthentication(); // Ensure authentication on page load
+
+        // Handle item upload
+        async function uploadItem(event) {
+            event.preventDefault();
+
+            const itemName = document.getElementById("itemName").value;
+            const description = document.getElementById("description").value;
+            const price = parseFloat(document.getElementById("price").value);
+            const endTime = new Date(document.getElementById("endTime").value).getTime();
+            const imageFile = document.getElementById("image").files[0];
+            const user = firebase.auth().currentUser;
+
+            try {
+                const storageRef = firebase.storage().ref();
+                const imageRef = storageRef.child(`images/${imageFile.name}`);
+
+                document.getElementById("progressContainer").style.display = "block";
+                const uploadTask = imageRef.put(imageFile);
+
+                uploadTask.on('state_changed', (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    document.getElementById("progressText").innerText = `${Math.floor(progress)}%`;
+                    document.getElementById("progressFill").style.width = `${progress}%`;
+                }, (error) => {
+                    alert("Error during upload: " + error.message);
+                }, async () => {
+                    const imageUrl = await uploadTask.snapshot.ref.getDownloadURL();
+                    const itemRef = firebase.database().ref(`onlineAuction/users/${user.uid}/auction-items`).push();
+                    await itemRef.set({
+                        name: itemName,
+                        description: description,
+                        price: price,
+                        highestBid: price,
+                        highestBidder: null,
+                        endTime: endTime,
+                        imageUrl: imageUrl,
+                        viewCount: 0 
+                    });
+
+                    alert("Item uploaded successfully!");
+                });
+            } catch (error) {
+                alert("Error during upload: " + error.message);
+            }
+        }
+
+        // Function to load user's auction items
+        function loadUserItems(userId) {
+            const userItemsRef = db.ref(`onlineAuction/users/${userId}/auction-items`);
+            userItemsRef.on('value', (snapshot) => {
+                const itemList = document.getElementById('itemList');
+                itemList.innerHTML = ''; // Clear existing items
+
+                if (!snapshot.exists()) {
+                    itemList.innerHTML = "<p>No items found.</p>";
+                    return;
+                }
+
+                snapshot.forEach((childSnapshot) => {
+                    const item = childSnapshot.val();
+                    const itemId = childSnapshot.key;
+
+                    const itemDiv = document.createElement('div');
+                    itemDiv.classList.add('item');
+                    itemDiv.innerHTML = `
+                        <h3>${item.name}</h3>
+                        <div class="form-group">
+                            <label>Item Name:</label>
+                            <input type="text" value="${item.name}" id="name-${itemId}">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description:</label>
+                            <textarea id="description-${itemId}" rows="3">${item.description}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Starting Price:</label>
+                            <input type="number" value="${item.price}" id="price-${itemId}">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Current Image:</label>
+                            <img src="${item.imageUrl || ''}" alt="Item Image" class="current-image">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Change Image:</label>
+                            <input type="file" id="image-${itemId}" accept="image/*">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Auction End Time:</label>
+                            <input type="datetime-local" value="${new Date(item.endTime).toISOString().slice(0, 16)}" id="endTime-${itemId}">
+                        </div>
+
+                        <div class="action-button-container">
+                            <button class="save-button" onclick="editItem('${userId}', '${itemId}')">Save Changes</button>
+                            <button class="delete-button" onclick="deleteItem('${userId}', '${itemId}')">Delete</button>
+                        </div>
+                    `;
+                    itemList.appendChild(itemDiv);
+                });
+            });
+        }
+
+        // Function to edit item details
+        async function editItem(userId, itemId) {
+            const name = document.getElementById(`name-${itemId}`).value;
+            const description = document.getElementById(`description-${itemId}`).value;
+            const price = parseFloat(document.getElementById(`price-${itemId}`).value);
+            const endTime = new Date(document.getElementById(`endTime-${itemId}`).value).getTime();
+            const imageFile = document.getElementById(`image-${itemId}`).files[0];
+
+            const itemRef = db.ref(`onlineAuction/users/${userId}/auction-items/${itemId}`);
+            
+            if (imageFile) {
+                const storageRef = firebase.storage().ref();
+                const imageRef = storageRef.child(`images/${userId}/${itemId}/${imageFile.name}`);
+                try {
+                    await imageRef.put(imageFile);
+                    const imageUrl = await imageRef.getDownloadURL();
+                    await itemRef.update({ name, description, price, endTime, imageUrl });
+                    alert("Item updated successfully with new image!");
+                } catch (error) {
+                    alert("Error updating item with image: " + error.message);
+                }
+            } else {
+                itemRef.update({ name, description, price, endTime })
+                .then(() => alert("Item updated successfully!"))
+                .catch((error) => alert("Error updating item: " + error.message));
+            }
+        }
+
+        // Function to delete an item
+        function deleteItem(userId, itemId) {
+            if (confirm("Are you sure you want to delete this item?")) {
+                const itemRef = db.ref(`onlineAuction/users/${userId}/auction-items/${itemId}`);
+                itemRef.remove()
+                .then(() => alert("Item deleted successfully!"))
+                .catch((error) => alert("Error deleting item: " + error.message));
+            }
+        }
+
+        // Load items once the user is authenticated
+        auth.onAuthStateChanged((user) => {
+            if (user) loadUserItems(user.uid);
         });
-
-        return foundItem || `No items found matching '${query}'.`;
-      } catch (error) {
-        console.error("Error searching auction item:", error);
-        return "Sorry, I couldn't search for the auction item. Please try again later.";
-      }
-    }
-
-    // Function to provide help message
-    function getHelpMessage() {
-      return `
-        Available Commands:
-        - 'list auctions': List all auction items.
-        - 'search <item name>': Search for a specific auction item by name.
-        - 'hello' or 'hi': Greet the chatbot.
-      `;
-    }
-
-    // Welcome message and authentication check
-    document.addEventListener('DOMContentLoaded', () => {
-      checkUserAuthentication(); // Check if user is logged in
-      displayMessage("Welcome to the Auction Chatbot! Type 'help' to see available commands.", 'bot');
-    });
-  </script>
+    </script>
 </body>
 </html>

@@ -70,10 +70,10 @@
                     const userDiv = document.createElement('div');
                     userDiv.innerHTML = `
                         <p>${user.username} (${user.email})</p>
-                        <button class="delete-button" onclick="deleteUser('${userId}')">Delete User</button>
-                        <button onclick="toggleEditForm('${userId}')">Edit User</button>
+                        <button class="delete-button" data-userid="${userId}">Delete User</button>
+                        <button class="edit-button" data-userid="${userId}">Edit User</button>
                         <div id="editForm-${userId}" class="edit-form">
-                            <form onsubmit="updateUser(event, '${userId}')">
+                            <form data-userid="${userId}">
                                 <label for="username-${userId}">Username:</label>
                                 <input type="text" id="username-${userId}" value="${user.username}" required>
 
@@ -98,6 +98,31 @@
                     `;
                     usersList.appendChild(userDiv);
                 });
+
+                // Add event listeners for "Delete User" buttons
+                document.querySelectorAll('.delete-button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const userId = button.getAttribute('data-userid');
+                        deleteUser(userId);
+                    });
+                });
+
+                // Add event listeners for "Edit User" buttons
+                document.querySelectorAll('.edit-button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const userId = button.getAttribute('data-userid');
+                        toggleEditForm(userId);
+                    });
+                });
+
+                // Add event listeners for edit forms
+                document.querySelectorAll('.edit-form form').forEach(form => {
+                    form.addEventListener('submit', (event) => {
+                        event.preventDefault();
+                        const userId = form.getAttribute('data-userid');
+                        updateUser(event, userId);
+                    });
+                });
             }, (error) => {
                 console.error("Error loading users:", error.message);
                 alert("Error loading users: " + error.message);
@@ -112,8 +137,6 @@
 
         // Update user information
         function updateUser(event, userId) {
-            event.preventDefault();
-
             const username = document.getElementById(`username-${userId}`).value;
             const hkid = document.getElementById(`hkid-${userId}`).value;
             const fullname = document.getElementById(`fullname-${userId}`).value;
@@ -269,10 +292,28 @@
                                     <label>Auction End Time:</label>
                                     <input type="datetime-local" value="${new Date(item.endTime).toISOString().slice(0, 16)}" id="endTime-${userId}-${itemId}">
                                 </div>
-                                <button onclick="editItem('${userId}', '${itemId}')">Save Changes</button>
-                                <button class="delete-button" onclick="deleteItem('${userId}', '${itemId}')">Delete</button>
+                                <button class="save-item-button" data-userid="${userId}" data-itemid="${itemId}">Save Changes</button>
+                                <button class="delete-item-button" data-userid="${userId}" data-itemid="${itemId}">Delete</button>
                             `;
                             itemList.appendChild(itemDiv);
+                        });
+
+                        // Add event listeners for "Save Changes" buttons in items
+                        document.querySelectorAll('.save-item-button').forEach(button => {
+                            button.addEventListener('click', () => {
+                                const userId = button.getAttribute('data-userid');
+                                const itemId = button.getAttribute('data-itemid');
+                                editItem(userId, itemId);
+                            });
+                        });
+
+                        // Add event listeners for "Delete" buttons in items
+                        document.querySelectorAll('.delete-item-button').forEach(button => {
+                            button.addEventListener('click', () => {
+                                const userId = button.getAttribute('data-userid');
+                                const itemId = button.getAttribute('data-itemid');
+                                deleteItem(userId, itemId);
+                            });
                         });
                     }, (error) => {
                         console.error("Error loading items for user", userId, ":", error.message);
@@ -375,10 +416,10 @@
         button:hover {
             background-color: #45a049;
         }
-        .delete-button {
+        .delete-button, .delete-item-button {
             background-color: red;
         }
-        .delete-button:hover {
+        .delete-button:hover, .delete-item-button:hover {
             background-color: #d32f2f;
         }
         .logout-button {

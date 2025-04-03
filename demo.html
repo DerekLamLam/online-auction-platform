@@ -29,6 +29,10 @@
         const storage = getStorage(app);
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Add event listener for the logout button
+            const logoutButton = document.querySelector('.logout-button');
+            logoutButton.addEventListener('click', logout);
+
             onAuthStateChanged(auth, (user) => {
                 if (!user) {
                     alert("You must be logged in to access this page.");
@@ -455,7 +459,7 @@
 </head>
 <body>
     <h1>Admin Dashboard</h1>
-    <button class="logout-button" onclick="logout()">Logout</button>
+    <button class="logout-button">Logout</button>
 
     <!-- Manage Users Section -->
     <div class="container">

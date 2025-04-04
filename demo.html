@@ -30,8 +30,8 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             // Add event listener for the logout button
-            const logoutButton = document.querySelector('.logout-button');
-            logoutButton.addEventListener('click', logout);
+           // const logoutButton = document.querySelector('.logout-button');
+          //  logoutButton.addEventListener('click', logout);
 
             onAuthStateChanged(auth, (user) => {
                 if (!user) {
@@ -364,16 +364,7 @@
             }
         }
 
-        // Logout function
-        function logout() {
-            signOut(auth).then(() => {
-                localStorage.removeItem('loggedInUser');
-                window.location.href = 'index.html';
-            }).catch((error) => {
-                console.error("Error logging out:", error.message);
-                alert("Error logging out: " + error.message);
-            });
-        }
+
     </script>
     <style>
         body {
@@ -459,7 +450,7 @@
 </head>
 <body>
     <h1>Admin Dashboard</h1>
-    <button class="logout-button">Logout</button>
+     <button onclick="logout()">Logout</button>
 
     <!-- Manage Users Section -->
     <div class="container">

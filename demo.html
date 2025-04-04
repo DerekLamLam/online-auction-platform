@@ -33,6 +33,10 @@
             const logoutButton = document.querySelector('.logout-button');
             logoutButton.addEventListener('click', logout);
 
+            // Add event listener for the upload form
+            const uploadForm = document.getElementById('uploadForm');
+            uploadForm.addEventListener('submit', uploadItem);
+
             onAuthStateChanged(auth, (user) => {
                 if (!user) {
                     alert("You must be logged in to access this page.");
@@ -199,8 +203,10 @@
         // Upload auction item
         async function uploadItem(event) {
             event.preventDefault();
+            console.log("uploadItem called");
 
             const userId = document.getElementById("userSelect").value;
+            console.log("User ID:", userId);
             if (!userId) {
                 alert("Please select a user to assign the item to.");
                 return;
@@ -212,13 +218,42 @@
             const endTime = new Date(document.getElementById("endTime").value).getTime();
             const imageFile = document.getElementById("image").files[0];
 
+            console.log("Item Name:", itemName);
+            console.log("Description:", description);
+            console.log("Price:", price);
+            console.log("End Time:", endTime);
+            console.log("Image File:", imageFile);
+
+            if (!itemName || !description) {
+                alert("Please fill out the Item Name and Description.");
+                return;
+            }
+
+            if (isNaN(price) || price <= 0) {
+                alert("Please enter a valid starting price.");
+                return;
+            }
+
+            if (isNaN(endTime)) {
+                alert("Please select a valid auction end time.");
+                return;
+            }
+
+            if (!imageFile) {
+                alert("Please select an image file.");
+                return;
+            }
+
             try {
                 const imageRef = storageRef(storage, `images/${userId}/${imageFile.name}`);
+                console.log("Uploading image to:", `images/${userId}/${imageFile.name}`);
                 await uploadBytes(imageRef, imageFile);
                 const imageUrl = await getDownloadURL(imageRef);
+                console.log("Image URL:", imageUrl);
 
                 const itemRef = ref(db, `onlineAuction/users/${userId}/auction-items`);
                 const newItemRef = push(itemRef);
+                console.log("Saving item to:", `onlineAuction/users/${userId}/auction-items`);
                 await set(newItemRef, {
                     name: itemName,
                     description: description,
@@ -471,9 +506,11 @@
     <div class="container">
         <h2>Upload Auction Item</h2>
         <div class="form-container">
-            <form id="uploadForm" onsubmit="uploadItem(event)">
+            <form id="uploadForm">
                 <label for="userSelect">Assign to User:</label>
-                <select id="userSelect" required></select>
+                <select id="userSelect" required>
+                    <option value="">Select a user</option>
+                </select>
 
                 <label for="itemName">Item Name:</label>
                 <input type="text" id="itemName" required>
@@ -500,5 +537,6 @@
         <h2>Manage Auction Items</h2>
         <div id="itemList"></div>
     </div>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92b27ae0f9cf78d2',t:'MTc0Mzc4NzI2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>

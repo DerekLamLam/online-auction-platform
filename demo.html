@@ -3,492 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <!-- Use Firebase 10.13.2 modular syntax -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-        import { getDatabase, ref, onValue, remove, update, push, set } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
-        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js";
+    <title>Userpage</title>
 
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
-            authDomain: "onlineauction-ba60b.firebaseapp.com",
-            databaseURL: "https://onlineauction-ba60b-default-rtdb.firebaseio.com",
-            projectId: "onlineauction-ba60b",
-            storageBucket: "onlineauction-ba60b.appspot.com",
-            messagingSenderId: "313811380253",
-            appId: "1:313811380253:web:e80553266413d869dafef4"
-        };
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-storage-compat.js"></script>
+    <script src="form.js"></script>
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const auth = getAuth(app);
-        const storage = getStorage(app);
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const logoutButton = document.querySelector('.logout-button');
-            logoutButton.addEventListener('click', logout);
-
-            const uploadForm = document.getElementById('uploadForm');
-            uploadForm.addEventListener('submit', uploadItem);
-
-            onAuthStateChanged(auth, (user) => {
-                if (!user) {
-                    alert("You must be logged in to access this page.");
-                    window.location.href = "index.html";
-                    return;
-                }
-
-                if (user.email !== "tszhim8889@gmail.com") {
-                    alert("Access Denied! You are not authorized.");
-                    window.location.href = "index.html";
-                    return;
-                }
-
-                console.log("Admin logged in:", user.email);
-                loadUsers();
-                loadAllItems();
-                populateUserSelect();
-            });
-        });
-
-        // Load all users
-        function loadUsers() {
-            const usersRef = ref(db, 'onlineAuction/users');
-            onValue(usersRef, (snapshot) => {
-                const usersList = document.getElementById('usersList');
-                usersList.innerHTML = "";
-                if (!snapshot.exists()) {
-                    console.log("No users found in the database.");
-                    usersList.innerHTML = "<p>No users found.</p>";
-                    return;
-                }
-
-                snapshot.forEach(userSnapshot => {
-                    const user = userSnapshot.val();
-                    const userId = userSnapshot.key;
-                    console.log("User data:", userId, user);
-                    const userDiv = document.createElement('div');
-                    userDiv.innerHTML = `
-                        <p>${user.username} (${user.email})</p>
-                        <button class="delete-button" data-userid="${userId}">Delete User</button>
-                        <button class="edit-button" data-userid="${userId}">Edit User</button>
-                        <div id="editForm-${userId}" class="edit-form">
-                            <form data-userid="${userId}">
-                                <label for="username-${userId}">Username:</label>
-                                <input type="text" id="username-${userId}" value="${user.username}" required>
-
-                                <label for="hkid-${userId}">HKID Number:</label>
-                                <input type="text" id="hkid-${userId}" value="${user.hkid || ''}" required>
-
-                                <label for="fullname-${userId}">Fullname:</label>
-                                <input type="text" id="fullname-${userId}" value="${user.fullname || ''}" required>
-
-                                <label for="phonenum-${userId}">Phone Number:</label>
-                                <input type="tel" id="phonenum-${userId}" value="${user.phoneNumber || ''}" required>
-
-                                <label for="address-${userId}">Address:</label>
-                                <input type="text" id="address-${userId}" value="${user.address || ''}" required>
-
-                                <button type="submit">Save Changes</button>
-                            </form>
-                        </div>
-                    `;
-                    usersList.appendChild(userDiv);
-                });
-
-                document.querySelectorAll('.delete-button').forEach(button => {
-                    button.addEventListener('click', () => {
-                        const userId = button.getAttribute('data-userid');
-                        deleteUser(userId);
-                    });
-                });
-
-                document.querySelectorAll('.edit-button').forEach(button => {
-                    button.addEventListener('click', () => {
-                        const userId = button.getAttribute('data-userid');
-                        toggleEditForm(userId);
-                    });
-                });
-
-                document.querySelectorAll('.edit-form form').forEach(form => {
-                    form.addEventListener('submit', (event) => {
-                        event.preventDefault();
-                        const userId = form.getAttribute('data-userid');
-                        updateUser(event, userId);
-                    });
-                });
-            }, (error) => {
-                console.error("Error loading users:", error.message);
-                alert("Error loading users: " + error.message);
-            });
-        }
-
-        function toggleEditForm(userId) {
-            const editForm = document.getElementById(`editForm-${userId}`);
-            editForm.style.display = editForm.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function updateUser(event, userId) {
-            const username = document.getElementById(`username-${userId}`).value;
-            const hkid = document.getElementById(`hkid-${userId}`).value;
-            const fullname = document.getElementById(`fullname-${userId}`).value;
-            const phoneNumber = document.getElementById(`phonenum-${userId}`).value;
-            const address = document.getElementById(`address-${userId}`).value;
-
-            const userRef = ref(db, `onlineAuction/users/${userId}`);
-            update(userRef, {
-                username: username,
-                hkid: hkid,
-                fullname: fullname,
-                phoneNumber: phoneNumber,
-                address: address
-            }).then(() => {
-                alert("User information updated successfully!");
-                toggleEditForm(userId);
-            }).catch(error => {
-                console.error("Error updating user:", error.message);
-                alert("Error updating user: " + error.message);
-            });
-        }
-
-        function deleteUser(userId) {
-            const userRef = ref(db, 'onlineAuction/users/' + userId);
-            remove(userRef)
-                .then(() => {
-                    alert("User deleted successfully!");
-                })
-                .catch(error => {
-                    console.error("Error deleting user:", error.message);
-                    alert("Error deleting user: " + error.message);
-                });
-        }
-
-        function populateUserSelect() {
-            const usersRef = ref(db, 'onlineAuction/users');
-            onValue(usersRef, (snapshot) => {
-                const userSelect = document.getElementById('userSelect');
-                userSelect.innerHTML = '<option value="">Select a user</option>';
-                if (!snapshot.exists()) {
-                    console.log("No users found for dropdown.");
-                    return;
-                }
-                snapshot.forEach(userSnapshot => {
-                    const user = userSnapshot.val();
-                    const userId = userSnapshot.key;
-                    const option = document.createElement('option');
-                    option.value = userId;
-                    option.text = `${user.username} (${user.email})`;
-                    userSelect.appendChild(option);
-                });
-            }, (error) => {
-                console.error("Error populating user dropdown:", error.message);
-            });
-        }
-
-        async function uploadItem(event) {
-            event.preventDefault();
-
-            const userId = document.getElementById("userSelect").value;
-            if (!userId) {
-                alert("Please select a user to assign the item to.");
-                return;
-            }
-
-            const itemName = document.getElementById("itemName").value;
-            const description = document.getElementById("description").value;
-            const price = parseFloat(document.getElementById("price").value);
-            const endTime = new Date(document.getElementById("endTime").value).getTime();
-            const imageFile = document.getElementById("image").files[0];
-
-            if (!imageFile) {
-                alert("Please select an image to upload.");
-                return;
-            }
-
-            console.log("Uploading item for user:", userId);
-            console.log("Item details:", { itemName, description, price, endTime });
-
-            try {
-                const imageRef = storageRef(storage, `images/${userId}/${imageFile.name}`);
-                console.log("Uploading image to:", imageRef.fullPath);
-                await uploadBytes(imageRef, imageFile);
-                const imageUrl = await getDownloadURL(imageRef);
-                console.log("Image uploaded, URL:", imageUrl);
-
-                const itemRef = ref(db, `onlineAuction/users/${userId}/auction-items`);
-                const newItemRef = push(itemRef);
-                await set(newItemRef, {
-                    name: itemName,
-                    description: description,
-                    price: price,
-                    highestBid: price,
-                    highestBidder: null,
-                    endTime: endTime,
-                    imageUrl: imageUrl,
-                    viewCount: 0
-                });
-
-                console.log("Item successfully saved to database with key:", newItemRef.key);
-                alert("Item uploaded successfully!");
-                document.getElementById("uploadForm").reset();
-            } catch (error) {
-                console.error("Upload failed:", error.code, error.message);
-                alert("Error during upload: " + error.message);
-            }
-        }
-
-        function loadAllItems() {
-            const usersRef = ref(db, 'onlineAuction/users');
-            onValue(usersRef, (snapshot) => {
-                const itemList = document.getElementById('itemList');
-                itemList.innerHTML = ''; // Clear the list before re-rendering
-                if (!snapshot.exists()) {
-                    console.log("No users or items found in the database.");
-                    itemList.innerHTML = "<p>No items found.</p>";
-                    return;
-                }
-
-                snapshot.forEach((userSnapshot) => {
-                    const userId = userSnapshot.key;
-                    const user = userSnapshot.val();
-                    const itemsRef = ref(db, `onlineAuction/users/${userId}/auction-items`);
-                    onValue(itemsRef, (itemSnapshot) => {
-                        // Clear existing items for this user to avoid duplicates
-                        const userItems = itemList.querySelectorAll(`[data-userid="${userId}"]`);
-                        userItems.forEach(item => item.remove());
-
-                        if (!itemSnapshot.exists()) {
-                            return;
-                        }
-
-                        itemSnapshot.forEach((itemChildSnapshot) => {
-                            const item = itemChildSnapshot.val();
-                            const itemId = itemChildSnapshot.key;
-
-                            const itemDiv = document.createElement('div');
-                            itemDiv.classList.add('item');
-                            itemDiv.setAttribute('data-userid', userId); // Mark with userId for easy removal
-                            itemDiv.innerHTML = `
-                                <h3>${item.name}</h3>
-                                <p>Owner: ${user.username} (${user.email})</p>
-                                <div>
-                                    <label>Item Name:</label>
-                                    <input type="text" value="${item.name}" id="name-${userId}-${itemId}">
-                                </div>
-                                <div>
-                                    <label>Description:</label>
-                                    <textarea id="description-${userId}-${itemId}">${item.description}</textarea>
-                                </div>
-                                <div>
-                                    <label>Starting Price:</label>
-                                    <input type="number" value="${item.price}" id="price-${userId}-${itemId}">
-                                </div>
-                                <div>
-                                    <label>Current Image:</label>
-                                    <img src="${item.imageUrl || ''}" alt="Item Image">
-                                </div>
-                                <div>
-                                    <label>Change Image:</label>
-                                    <input type="file" id="image-${userId}-${itemId}" accept="image/*">
-                                </div>
-                                <div>
-                                    <label>Auction End Time:</label>
-                                    <input type="datetime-local" value="${new Date(item.endTime).toISOString().slice(0, 16)}" id="endTime-${userId}-${itemId}">
-                                </div>
-                                <button class="save-item-button" data-userid="${userId}" data-itemid="${itemId}">Save Changes</button>
-                                <button class="delete-item-button" data-userid="${userId}" data-itemid="${itemId}">Delete</button>
-                            `;
-                            itemList.appendChild(itemDiv);
-                        });
-
-                        // Remove existing event listeners and re-add them
-                        document.querySelectorAll('.save-item-button').forEach(button => {
-                            // Clone the button to remove all existing event listeners
-                            const newButton = button.cloneNode(true);
-                            button.parentNode.replaceChild(newButton, button);
-                            newButton.addEventListener('click', () => {
-                                const userId = newButton.getAttribute('data-userid');
-                                const itemId = newButton.getAttribute('data-itemid');
-                                editItem(userId, itemId);
-                            });
-                        });
-
-                        document.querySelectorAll('.delete-item-button').forEach(button => {
-                            const newButton = button.cloneNode(true);
-                            button.parentNode.replaceChild(newButton, button);
-                            newButton.addEventListener('click', () => {
-                                const userId = newButton.getAttribute('data-userid');
-                                const itemId = newButton.getAttribute('data-itemid');
-                                deleteItem(userId, itemId);
-                            });
-                        });
-                    }, (error) => {
-                        console.error("Error loading items for user", userId, ":", error.message);
-                    });
-                });
-            }, (error) => {
-                console.error("Error loading users for items:", error.message);
-                alert("Error loading items: " + error.message);
-            });
-        }
-
-        async function editItem(userId, itemId) {
-            const name = document.getElementById(`name-${userId}-${itemId}`).value;
-            const description = document.getElementById(`description-${userId}-${itemId}`).value;
-            const price = parseFloat(document.getElementById(`price-${userId}-${itemId}`).value);
-            const endTime = new Date(document.getElementById(`endTime-${userId}-${itemId}`).value).getTime();
-            const imageFile = document.getElementById(`image-${userId}-${itemId}`).files[0];
-
-            const itemRef = ref(db, `onlineAuction/users/${userId}/auction-items/${itemId}`);
-
-            try {
-                if (imageFile) {
-                    const imageRef = storageRef(storage, `images/${userId}/${itemId}/${imageFile.name}`);
-                    await uploadBytes(imageRef, imageFile);
-                    const imageUrl = await getDownloadURL(imageRef);
-                    await update(itemRef, { name, description, price, endTime, imageUrl });
-                    alert("Item updated successfully with new image!");
-                } else {
-                    await update(itemRef, { name, description, price, endTime });
-                    alert("Item updated successfully!");
-                }
-            } catch (error) {
-                console.error("Error updating item:", error.message);
-                alert("Error updating item: " + error.message);
-            }
-        }
-
-        function deleteItem(userId, itemId) {
-            if (confirm("Are you sure you want to delete this item?")) {
-                const itemRef = ref(db, `onlineAuction/users/${userId}/auction-items/${itemId}`);
-                remove(itemRef)
-                    .then(() => alert("Item deleted successfully!"))
-                    .catch((error) => {
-                        console.error("Error deleting item:", error.message);
-                        alert("Error deleting item: " + error.message);
-                    });
-            }
-        }
-
-        function logout() {
-            signOut(auth).then(() => {
-                localStorage.removeItem('loggedInUser');
-                window.location.href = 'index.html';
-            }).catch((error) => {
-                console.error("Error logging out:", error.message);
-                alert("Error logging out: " + error.message);
-            });
-        }
-    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f9;
             margin: 0;
-            padding: 20px;
         }
-        h1, h2 {
-            color: #333;
-        }
+
         .container {
             background-color: #fff;
-            padding: 20px;
+            padding: 40px;
             border-radius: 10px;
             box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 100px auto;
+        }
+
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-container {
             margin-bottom: 20px;
         }
-        .form-container input, .form-container textarea, .form-container select {
+
+        .form-container label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-container input,
+        .form-container textarea,
+        .form-container select {
             width: 100%;
-            padding: 10px;
-            margin: 5px 0;
+            padding: 12px;
+            margin: 8px 0;
             border: 1px solid #ddd;
             border-radius: 5px;
+            font-size: 16px;
         }
+
         .form-container textarea {
             resize: vertical;
             min-height: 100px;
         }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
         button {
+            width: 48%;
             padding: 10px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
+            font-size: 14px;
             cursor: pointer;
-            margin: 5px;
+            transition: background-color 0.3s;
         }
+
         button:hover {
             background-color: #45a049;
         }
-        .delete-button, .delete-item-button {
+
+        .delete-button {
             background-color: red;
         }
-        .delete-button:hover, .delete-item-button:hover {
+
+        .delete-button:hover {
             background-color: #d32f2f;
         }
-        .logout-button {
-            background-color: red;
+
+        .auction-item-container {
+            margin-top: 20px;
         }
-        .logout-button:hover {
-            background-color: #d32f2f;
+
+        .auction-item-container h2 {
+            margin-top: 20px;
         }
-        .item {
+
+        .auction-item-container .item {
             background-color: #f9f9f9;
             border: 1px solid #ddd;
-            padding: 15px;
             margin-bottom: 10px;
+            padding: 15px;
             border-radius: 5px;
         }
-        .item img {
-            max-width: 200px;
+
+        .auction-item-container .item img {
+            max-width: 200px; /* Increased image size */
             margin-top: 10px;
         }
-        .edit-form {
-            display: none;
-            background-color: #f9f9f9;
-            padding: 15px;
-            border: 1px solid #ddd;
+
+        .logout-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .top-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin: 20px;
+        }
+
+        .top-buttons button {
+            padding: 10px 20px;
+            background-color: #2196F3; /* Blue color */
+            color: white;
+            border: none;
             border-radius: 5px;
-            margin-top: 10px;
+            margin-left: 10px;
+            cursor: pointer;
         }
-        .edit-form label {
-            display: inline-block;
-            width: 120px;
-            margin-right: 10px;
-        }
-        .edit-form input, .edit-form textarea {
-            width: calc(100% - 140px);
-            margin-bottom: 10px;
+
+        .top-buttons button:hover {
+            background-color: #1976D2; /* Darker blue for hover */
         }
     </style>
 </head>
 <body>
-    <h1>Admin Dashboard</h1>
-    <button class="logout-button">Logout</button>
-
-    <!-- Manage Users Section -->
-    <div class="container">
-        <h2>Manage Users</h2>
-        <div id="usersList"></div>
+    <!-- Top buttons for navigation -->
+    <div class="top-buttons">
+        <button onclick="window.location.href='home.html'">HomePage</button>
+        <button onclick="window.location.href='chatbot.html'">ChatbotPage</button>
+        <button onclick="logout()">Logout</button>
     </div>
 
-    <!-- Upload Auction Item Section -->
+    <!-- Main content container -->
     <div class="container">
-        <h2>Upload Auction Item</h2>
-        <div class="form-container">
-            <form id="uploadForm">
-                <label for="userSelect">Assign to User:</label>
-                <select id="userSelect" required></select>
+        <h1 id="welcomeMessage">Welcome</h1>
 
+        <div class="form-container">
+            <h3>Upload Auction Item</h3>
+            <form id="uploadForm" onsubmit="uploadItem(event)">
                 <label for="itemName">Item Name:</label>
                 <input type="text" id="itemName" required>
 
                 <label for="description">Description:</label>
-                <textarea id="description" required></textarea>
+                <textarea id="description" required rows="4"></textarea>
 
                 <label for="price">Starting Price:</label>
                 <input type="number" id="price" required>
@@ -501,13 +172,212 @@
 
                 <button type="submit">Upload Item</button>
             </form>
+
+            <div id="progressContainer" style="display:none;">
+                <p>Uploading: <span id="progressText">0%</span></p>
+                <div id="progressBar">
+                    <div id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="auction-item-container">
+            <h2>Edit Your Auction Items</h2>
+            <div id="itemList"></div>
         </div>
     </div>
 
-    <!-- Manage Auction Items Section -->
-    <div class="container">
-        <h2>Manage Auction Items</h2>
-        <div id="itemList"></div>
-    </div>
+    <script>
+        // Function to show alert when the user is not logged in
+        function showLoginAlert() {
+            if (!localStorage.getItem("alertShown")) {
+                alert("You must be logged in to access this page.");
+                localStorage.setItem("alertShown", "true"); // Prevent multiple alerts
+            }
+        }
+
+        // Function to handle logout
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                alert("You have been logged out successfully.");
+                window.location.href = "index.html"; // Redirect to login page
+            }).catch((error) => {
+                console.error("Error logging out: ", error);
+            });
+        }
+
+        // Ensure user is authenticated
+        function checkUserAuthentication() {
+            firebase.auth().onAuthStateChanged((user) => {
+                if (!user) {
+                    showLoginAlert(); // Show login alert if not logged in
+                    window.location.href = "index.html"; // Redirect to login page if not logged in
+                } else {
+                    const userId = user.uid;
+                    const userRef = firebase.database().ref(`onlineAuction/users/${userId}`);
+
+                    userRef.child('username').once('value')
+                        .then(snapshot => {
+                            const username = snapshot.val() || user.email.split('@')[0];
+                            document.getElementById('welcomeMessage').innerText = `Welcome ${username}`;
+                        })
+                        .catch(error => {
+                            console.error("Error fetching user data:", error);
+                            document.getElementById('welcomeMessage').innerText = `Welcome  ${user.email.split('@')[0]}`;
+                        });
+                }
+            });
+        }
+
+        checkUserAuthentication(); // Ensure authentication on page load
+
+        // Handle item upload
+        async function uploadItem(event) {
+            event.preventDefault();
+
+            const itemName = document.getElementById("itemName").value;
+            const description = document.getElementById("description").value;
+            const price = parseFloat(document.getElementById("price").value);
+            const endTime = new Date(document.getElementById("endTime").value).getTime();
+            const imageFile = document.getElementById("image").files[0];
+            const user = firebase.auth().currentUser;
+
+            try {
+                const storageRef = firebase.storage().ref();
+                const imageRef = storageRef.child(`images/${imageFile.name}`);
+
+                document.getElementById("progressContainer").style.display = "block";
+                const uploadTask = imageRef.put(imageFile);
+
+                uploadTask.on('state_changed', (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    document.getElementById("progressText").innerText = `${Math.floor(progress)}%`;
+                    document.getElementById("progressFill").style.width = `${progress}%`;
+                }, (error) => {
+                    alert("Error during upload: " + error.message);
+                }, async () => {
+                    const imageUrl = await uploadTask.snapshot.ref.getDownloadURL();
+                    const itemRef = firebase.database().ref(`onlineAuction/users/${user.uid}/auction-items`).push();
+                    await itemRef.set({
+                        name: itemName,
+                        description: description,
+                        price: price,
+                        highestBid: price,
+                        highestBidder: null,
+                        endTime: endTime,
+                        imageUrl: imageUrl,
+                        viewCount: 0 
+                    });
+
+                    alert("Item uploaded successfully!");
+                });
+            } catch (error) {
+                alert("Error during upload: " + error.message);
+            }
+        }
+
+        // Function to load user's auction items
+        function loadUserItems(userId) {
+            const userItemsRef = db.ref(`onlineAuction/users/${userId}/auction-items`);
+            userItemsRef.on('value', (snapshot) => {
+                const itemList = document.getElementById('itemList');
+                itemList.innerHTML = ''; // Clear existing items
+
+                if (!snapshot.exists()) {
+                    itemList.innerHTML = "<p>No items found.</p>";
+                    return;
+                }
+
+                snapshot.forEach((childSnapshot) => {
+                    const item = childSnapshot.val();
+                    const itemId = childSnapshot.key;
+
+                    const itemDiv = document.createElement('div');
+                    itemDiv.classList.add('item');
+                    itemDiv.innerHTML = `
+                        <h3>${item.name}</h3>
+                        <div class="form-group">
+                            <label>Item Name:</label>
+                            <input type="text" value="${item.name}" id="name-${itemId}">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description:</label>
+                            <textarea id="description-${itemId}" rows="3">${item.description}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Starting Price:</label>
+                            <input type="number" value="${item.price}" id="price-${itemId}">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Current Image:</label>
+                            <img src="${item.imageUrl || ''}" alt="Item Image" class="current-image">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Change Image:</label>
+                            <input type="file" id="image-${itemId}" accept="image/*">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Auction End Time:</label>
+                            <input type="datetime-local" value="${new Date(item.endTime).toISOString().slice(0, 16)}" id="endTime-${itemId}">
+                        </div>
+
+                        <div class="action-button-container">
+                            <button class="save-button" onclick="editItem('${userId}', '${itemId}')">Save Changes</button>
+                            <button class="delete-button" onclick="deleteItem('${userId}', '${itemId}')">Delete</button>
+                        </div>
+                    `;
+                    itemList.appendChild(itemDiv);
+                });
+            });
+        }
+
+        // Function to edit item details
+        async function editItem(userId, itemId) {
+            const name = document.getElementById(`name-${itemId}`).value;
+            const description = document.getElementById(`description-${itemId}`).value;
+            const price = parseFloat(document.getElementById(`price-${itemId}`).value);
+            const endTime = new Date(document.getElementById(`endTime-${itemId}`).value).getTime();
+            const imageFile = document.getElementById(`image-${itemId}`).files[0];
+
+            const itemRef = db.ref(`onlineAuction/users/${userId}/auction-items/${itemId}`);
+            
+            if (imageFile) {
+                const storageRef = firebase.storage().ref();
+                const imageRef = storageRef.child(`images/${userId}/${itemId}/${imageFile.name}`);
+                try {
+                    await imageRef.put(imageFile);
+                    const imageUrl = await imageRef.getDownloadURL();
+                    await itemRef.update({ name, description, price, endTime, imageUrl });
+                    alert("Item updated successfully with new image!");
+                } catch (error) {
+                    alert("Error updating item with image: " + error.message);
+                }
+            } else {
+                itemRef.update({ name, description, price, endTime })
+                .then(() => alert("Item updated successfully!"))
+                .catch((error) => alert("Error updating item: " + error.message));
+            }
+        }
+
+        // Function to delete an item
+        function deleteItem(userId, itemId) {
+            if (confirm("Are you sure you want to delete this item?")) {
+                const itemRef = db.ref(`onlineAuction/users/${userId}/auction-items/${itemId}`);
+                itemRef.remove()
+                .then(() => alert("Item deleted successfully!"))
+                .catch((error) => alert("Error deleting item: " + error.message));
+            }
+        }
+
+        // Load items once the user is authenticated
+        auth.onAuthStateChanged((user) => {
+            if (user) loadUserItems(user.uid);
+        });
+    </script>
 </body>
 </html>

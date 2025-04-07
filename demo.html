@@ -29,11 +29,9 @@
         const storage = getStorage(app);
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Add event listener for the logout button
             const logoutButton = document.querySelector('.logout-button');
             logoutButton.addEventListener('click', logout);
 
-            // Attach event listener to the upload form
             const uploadForm = document.getElementById('uploadForm');
             uploadForm.addEventListener('submit', uploadItem);
 
@@ -44,14 +42,12 @@
                     return;
                 }
 
-                // Check if the user is the admin
-                if (user.email.toLowerCase() !== "tszhim8889@gmail.com") {
+                if (user.email !== "tszhim8889@gmail.com") {
                     alert("Access Denied! You are not authorized.");
                     window.location.href = "index.html";
                     return;
                 }
 
-                // If admin, load data
                 console.log("Admin logged in:", user.email);
                 loadUsers();
                 loadAllItems();
@@ -104,7 +100,6 @@
                     usersList.appendChild(userDiv);
                 });
 
-                // Add event listeners for "Delete User" buttons
                 document.querySelectorAll('.delete-button').forEach(button => {
                     button.addEventListener('click', () => {
                         const userId = button.getAttribute('data-userid');
@@ -112,7 +107,6 @@
                     });
                 });
 
-                // Add event listeners for "Edit User" buttons
                 document.querySelectorAll('.edit-button').forEach(button => {
                     button.addEventListener('click', () => {
                         const userId = button.getAttribute('data-userid');
@@ -120,7 +114,6 @@
                     });
                 });
 
-                // Add event listeners for edit forms
                 document.querySelectorAll('.edit-form form').forEach(form => {
                     form.addEventListener('submit', (event) => {
                         event.preventDefault();
@@ -134,13 +127,11 @@
             });
         }
 
-        // Toggle edit form visibility
         function toggleEditForm(userId) {
             const editForm = document.getElementById(`editForm-${userId}`);
             editForm.style.display = editForm.style.display === 'block' ? 'none' : 'block';
         }
 
-        // Update user information
         function updateUser(event, userId) {
             const username = document.getElementById(`username-${userId}`).value;
             const hkid = document.getElementById(`hkid-${userId}`).value;
@@ -164,7 +155,6 @@
             });
         }
 
-        // Delete user
         function deleteUser(userId) {
             const userRef = ref(db, 'onlineAuction/users/' + userId);
             remove(userRef)
@@ -177,7 +167,6 @@
                 });
         }
 
-        // Populate user dropdown for item upload
         function populateUserSelect() {
             const usersRef = ref(db, 'onlineAuction/users');
             onValue(usersRef, (snapshot) => {
@@ -200,7 +189,6 @@
             });
         }
 
-        // Upload auction item
         async function uploadItem(event) {
             event.preventDefault();
 
@@ -217,22 +205,20 @@
             const imageFile = document.getElementById("image").files[0];
 
             if (!imageFile) {
-                alert("Please select an image file.");
+                alert("Please select an image to upload.");
                 return;
             }
 
-            try {
-                console.log("Starting image upload for userId:", userId);
-                // Upload image to Firebase Storage
-                const imagePath = `images/${userId}/${Date.now()}_${imageFile.name}`;
-                const imageRef = storageRef(storage, imagePath);
-                const uploadResult = await uploadBytes(imageRef, imageFile);
-                console.log("Image uploaded successfully, getting download URL...");
-                const imageUrl = await getDownloadURL(uploadResult.ref);
-                console.log("Image URL:", imageUrl);
+            console.log("Uploading item for user:", userId);
+            console.log("Item details:", { itemName, description, price, endTime });
 
-                console.log("Writing item data to database for userId:", userId);
-                // Save item data to Firebase Realtime Database
+            try {
+                const imageRef = storageRef(storage, `images/${userId}/${imageFile.name}`);
+                console.log("Uploading image to:", imageRef.fullPath);
+                await uploadBytes(imageRef, imageFile);
+                const imageUrl = await getDownloadURL(imageRef);
+                console.log("Image uploaded, URL:", imageUrl);
+
                 const itemRef = ref(db, `onlineAuction/users/${userId}/auction-items`);
                 const newItemRef = push(itemRef);
                 await set(newItemRef, {
@@ -245,17 +231,16 @@
                     imageUrl: imageUrl,
                     viewCount: 0
                 });
-                console.log("Item data written successfully!");
 
+                console.log("Item successfully saved to database with key:", newItemRef.key);
                 alert("Item uploaded successfully!");
                 document.getElementById("uploadForm").reset();
             } catch (error) {
-                console.error("Error during upload:", error);
-                alert(`Failed to upload item: ${error.message}`);
+                console.error("Upload failed:", error.code, error.message);
+                alert("Error during upload: " + error.message);
             }
         }
 
-        // Load all auction items from all users
         function loadAllItems() {
             const usersRef = ref(db, 'onlineAuction/users');
             onValue(usersRef, (snapshot) => {
@@ -314,7 +299,6 @@
                             itemList.appendChild(itemDiv);
                         });
 
-                        // Add event listeners for "Save Changes" buttons in items
                         document.querySelectorAll('.save-item-button').forEach(button => {
                             button.addEventListener('click', () => {
                                 const userId = button.getAttribute('data-userid');
@@ -323,7 +307,6 @@
                             });
                         });
 
-                        // Add event listeners for "Delete" buttons in items
                         document.querySelectorAll('.delete-item-button').forEach(button => {
                             button.addEventListener('click', () => {
                                 const userId = button.getAttribute('data-userid');
@@ -341,7 +324,6 @@
             });
         }
 
-        // Edit auction item
         async function editItem(userId, itemId) {
             const name = document.getElementById(`name-${userId}-${itemId}`).value;
             const description = document.getElementById(`description-${userId}-${itemId}`).value;
@@ -368,7 +350,6 @@
             }
         }
 
-        // Delete auction item
         function deleteItem(userId, itemId) {
             if (confirm("Are you sure you want to delete this item?")) {
                 const itemRef = ref(db, `onlineAuction/users/${userId}/auction-items/${itemId}`);
@@ -381,7 +362,6 @@
             }
         }
 
-        // Logout function
         function logout() {
             signOut(auth).then(() => {
                 localStorage.removeItem('loggedInUser');
@@ -517,5 +497,5 @@
         <h2>Manage Auction Items</h2>
         <div id="itemList"></div>
     </div>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92cb0ce3def2b0a5',t:'MTc0NDA0NDkwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

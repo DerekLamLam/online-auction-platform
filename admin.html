@@ -29,9 +29,11 @@
         const storage = getStorage(app);
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Add event listener for the logout button
             const logoutButton = document.querySelector('.logout-button');
             logoutButton.addEventListener('click', logout);
+
+            const uploadForm = document.getElementById('uploadForm');
+            uploadForm.addEventListener('submit', uploadItem);
 
             onAuthStateChanged(auth, (user) => {
                 if (!user) {
@@ -40,14 +42,12 @@
                     return;
                 }
 
-                // Check if the user is the admin
                 if (user.email !== "tszhim8889@gmail.com") {
                     alert("Access Denied! You are not authorized.");
                     window.location.href = "index.html";
                     return;
                 }
 
-                // If admin, load data
                 console.log("Admin logged in:", user.email);
                 loadUsers();
                 loadAllItems();
@@ -100,7 +100,6 @@
                     usersList.appendChild(userDiv);
                 });
 
-                // Add event listeners for "Delete User" buttons
                 document.querySelectorAll('.delete-button').forEach(button => {
                     button.addEventListener('click', () => {
                         const userId = button.getAttribute('data-userid');
@@ -108,7 +107,6 @@
                     });
                 });
 
-                // Add event listeners for "Edit User" buttons
                 document.querySelectorAll('.edit-button').forEach(button => {
                     button.addEventListener('click', () => {
                         const userId = button.getAttribute('data-userid');
@@ -116,7 +114,6 @@
                     });
                 });
 
-                // Add event listeners for edit forms
                 document.querySelectorAll('.edit-form form').forEach(form => {
                     form.addEventListener('submit', (event) => {
                         event.preventDefault();
@@ -130,13 +127,11 @@
             });
         }
 
-        // Toggle edit form visibility
         function toggleEditForm(userId) {
             const editForm = document.getElementById(`editForm-${userId}`);
             editForm.style.display = editForm.style.display === 'block' ? 'none' : 'block';
         }
 
-        // Update user information
         function updateUser(event, userId) {
             const username = document.getElementById(`username-${userId}`).value;
             const hkid = document.getElementById(`hkid-${userId}`).value;
@@ -160,7 +155,6 @@
             });
         }
 
-        // Delete user
         function deleteUser(userId) {
             const userRef = ref(db, 'onlineAuction/users/' + userId);
             remove(userRef)
@@ -173,7 +167,6 @@
                 });
         }
 
-        // Populate user dropdown for item upload
         function populateUserSelect() {
             const usersRef = ref(db, 'onlineAuction/users');
             onValue(usersRef, (snapshot) => {
@@ -196,7 +189,6 @@
             });
         }
 
-        // Upload auction item
         async function uploadItem(event) {
             event.preventDefault();
 
@@ -212,10 +204,20 @@
             const endTime = new Date(document.getElementById("endTime").value).getTime();
             const imageFile = document.getElementById("image").files[0];
 
+            if (!imageFile) {
+                alert("Please select an image to upload.");
+                return;
+            }
+
+            console.log("Uploading item for user:", userId);
+            console.log("Item details:", { itemName, description, price, endTime });
+
             try {
                 const imageRef = storageRef(storage, `images/${userId}/${imageFile.name}`);
+                console.log("Uploading image to:", imageRef.fullPath);
                 await uploadBytes(imageRef, imageFile);
                 const imageUrl = await getDownloadURL(imageRef);
+                console.log("Image uploaded, URL:", imageUrl);
 
                 const itemRef = ref(db, `onlineAuction/users/${userId}/auction-items`);
                 const newItemRef = push(itemRef);
@@ -230,20 +232,20 @@
                     viewCount: 0
                 });
 
+                console.log("Item successfully saved to database with key:", newItemRef.key);
                 alert("Item uploaded successfully!");
                 document.getElementById("uploadForm").reset();
             } catch (error) {
-                console.error("Error during upload:", error.message);
+                console.error("Upload failed:", error.code, error.message);
                 alert("Error during upload: " + error.message);
             }
         }
 
-        // Load all auction items from all users
         function loadAllItems() {
             const usersRef = ref(db, 'onlineAuction/users');
             onValue(usersRef, (snapshot) => {
                 const itemList = document.getElementById('itemList');
-                itemList.innerHTML = '';
+                itemList.innerHTML = ''; // Clear the list before re-rendering
                 if (!snapshot.exists()) {
                     console.log("No users or items found in the database.");
                     itemList.innerHTML = "<p>No items found.</p>";
@@ -255,15 +257,21 @@
                     const user = userSnapshot.val();
                     const itemsRef = ref(db, `onlineAuction/users/${userId}/auction-items`);
                     onValue(itemsRef, (itemSnapshot) => {
+                        // Clear existing items for this user to avoid duplicates
+                        const userItems = itemList.querySelectorAll(`[data-userid="${userId}"]`);
+                        userItems.forEach(item => item.remove());
+
                         if (!itemSnapshot.exists()) {
                             return;
                         }
+
                         itemSnapshot.forEach((itemChildSnapshot) => {
                             const item = itemChildSnapshot.val();
                             const itemId = itemChildSnapshot.key;
 
                             const itemDiv = document.createElement('div');
                             itemDiv.classList.add('item');
+                            itemDiv.setAttribute('data-userid', userId); // Mark with userId for easy removal
                             itemDiv.innerHTML = `
                                 <h3>${item.name}</h3>
                                 <p>Owner: ${user.username} (${user.email})</p>
@@ -297,20 +305,24 @@
                             itemList.appendChild(itemDiv);
                         });
 
-                        // Add event listeners for "Save Changes" buttons in items
+                        // Remove existing event listeners and re-add them
                         document.querySelectorAll('.save-item-button').forEach(button => {
-                            button.addEventListener('click', () => {
-                                const userId = button.getAttribute('data-userid');
-                                const itemId = button.getAttribute('data-itemid');
+                            // Clone the button to remove all existing event listeners
+                            const newButton = button.cloneNode(true);
+                            button.parentNode.replaceChild(newButton, button);
+                            newButton.addEventListener('click', () => {
+                                const userId = newButton.getAttribute('data-userid');
+                                const itemId = newButton.getAttribute('data-itemid');
                                 editItem(userId, itemId);
                             });
                         });
 
-                        // Add event listeners for "Delete" buttons in items
                         document.querySelectorAll('.delete-item-button').forEach(button => {
-                            button.addEventListener('click', () => {
-                                const userId = button.getAttribute('data-userid');
-                                const itemId = button.getAttribute('data-itemid');
+                            const newButton = button.cloneNode(true);
+                            button.parentNode.replaceChild(newButton, button);
+                            newButton.addEventListener('click', () => {
+                                const userId = newButton.getAttribute('data-userid');
+                                const itemId = newButton.getAttribute('data-itemid');
                                 deleteItem(userId, itemId);
                             });
                         });
@@ -324,7 +336,6 @@
             });
         }
 
-        // Edit auction item
         async function editItem(userId, itemId) {
             const name = document.getElementById(`name-${userId}-${itemId}`).value;
             const description = document.getElementById(`description-${userId}-${itemId}`).value;
@@ -351,7 +362,6 @@
             }
         }
 
-        // Delete auction item
         function deleteItem(userId, itemId) {
             if (confirm("Are you sure you want to delete this item?")) {
                 const itemRef = ref(db, `onlineAuction/users/${userId}/auction-items/${itemId}`);
@@ -364,7 +374,6 @@
             }
         }
 
-        // Logout function
         function logout() {
             signOut(auth).then(() => {
                 localStorage.removeItem('loggedInUser');
@@ -471,7 +480,7 @@
     <div class="container">
         <h2>Upload Auction Item</h2>
         <div class="form-container">
-            <form id="uploadForm" onsubmit="uploadItem(event)">
+            <form id="uploadForm">
                 <label for="userSelect">Assign to User:</label>
                 <select id="userSelect" required></select>
 

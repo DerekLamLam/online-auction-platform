@@ -40,14 +40,14 @@
                 }
 
                 // Admin check
-                if (user.email !== "tszhim8889@gmail.com" && user.uid !== user.uid) {
+                if (user.email !== "tszhim8889@gmail.com") {
                     alert("Access Denied! You are not authorized.");
                     window.location.href = "index.html";
                     return;
                 }
 
                 // Admin or Owner allowed
-                console.log("User logged in:", user.email);
+                console.log("Admin logged in:", user.email);
                 loadUsers();
                 loadAllItems();
                 populateUserSelect();
@@ -85,19 +85,23 @@
             const usersRef = ref(db, 'onlineAuction/users');
             onValue(usersRef, (snapshot) => {
                 const userSelect = document.getElementById('userSelect');
-                userSelect.innerHTML = '<option value="">Select a user</option>';
-                if (!snapshot.exists()) {
-                    console.log("No users found for dropdown.");
-                    return;
+                if (userSelect) {
+                    userSelect.innerHTML = '<option value="">Select a user</option>';
+                    if (!snapshot.exists()) {
+                        console.log("No users found for dropdown.");
+                        return;
+                    }
+                    snapshot.forEach(userSnapshot => {
+                        const user = userSnapshot.val();
+                        const userId = userSnapshot.key;
+                        const option = document.createElement('option');
+                        option.value = userId;
+                        option.text = `${user.username} (${user.email})`;
+                        userSelect.appendChild(option);
+                    });
+                } else {
+                    console.error("The userSelect element is not found in the DOM.");
                 }
-                snapshot.forEach(userSnapshot => {
-                    const user = userSnapshot.val();
-                    const userId = userSnapshot.key;
-                    const option = document.createElement('option');
-                    option.value = userId;
-                    option.text = `${user.username} (${user.email})`;
-                    userSelect.appendChild(option);
-                });
             });
         }
 

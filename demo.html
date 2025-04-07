@@ -199,80 +199,71 @@
                 console.error("Error populating user dropdown:", error.message);
             });
         }
+async function uploadItem(event) {
+    event.preventDefault();
 
-        // Upload auction item
-        async function uploadItem(event) {
-            event.preventDefault();
-            console.log("uploadItem called");
+    const userId = document.getElementById("userSelect").value;
+    if (!userId) {
+        alert("Please select a user to assign the item to.");
+        return;
+    }
 
-            const userId = document.getElementById("userSelect").value;
-            console.log("User ID:", userId);
-            if (!userId) {
-                alert("Please select a user to assign the item to.");
-                return;
-            }
+    const itemName = document.getElementById("itemName").value;
+    const description = document.getElementById("description").value;
+    const price = parseFloat(document.getElementById("price").value);
+    const endTime = new Date(document.getElementById("endTime").value).getTime();
+    const imageFile = document.getElementById("image").files[0];
 
-            const itemName = document.getElementById("itemName").value;
-            const description = document.getElementById("description").value;
-            const price = parseFloat(document.getElementById("price").value);
-            const endTime = new Date(document.getElementById("endTime").value).getTime();
-            const imageFile = document.getElementById("image").files[0];
+    // Validate price
+    if (isNaN(price) || price <= 0) {
+        alert("Please enter a valid starting price greater than 0.");
+        return;
+    }
 
-            console.log("Item Name:", itemName);
-            console.log("Description:", description);
-            console.log("Price:", price);
-            console.log("End Time:", endTime);
-            console.log("Image File:", imageFile);
+    // Validate endTime
+    if (isNaN(endTime)) {
+        alert("Please enter a valid auction end time.");
+        return;
+    }
 
-            if (!itemName || !description) {
-                alert("Please fill out the Item Name and Description.");
-                return;
-            }
+    // Validate imageFile
+    if (!imageFile) {
+        alert("Please select an image file.");
+        return;
+    }
 
-            if (isNaN(price) || price <= 0) {
-                alert("Please enter a valid starting price.");
-                return;
-            }
+    try {
+        // Step 1: Upload image to storage
+        const imageRef = storageRef(storage, `images/${userId}/${imageFile.name}`);
+        console.log("Uploading image to:", imageRef.fullPath);
+        await uploadBytes(imageRef, imageFile);
+        const imageUrl = await getDownloadURL(imageRef);
+        console.log("Image uploaded successfully, URL:", imageUrl);
 
-            if (isNaN(endTime)) {
-                alert("Please select a valid auction end time.");
-                return;
-            }
+        // Step 2: Write to database
+        const itemRef = ref(db, `onlineAuction/users/${userId}/auction-items`);
+        const newItemRef = push(itemRef);
+        console.log("Writing item to:", newItemRef.path.toString());
+        await set(newItemRef, {
+            name: itemName,
+            description: description,
+            price: price,
+            highestBid: price,
+            highestBidder: null,
+            endTime: endTime,
+            imageUrl: imageUrl,
+            viewCount: 0
+        });
+        console.log("Item written to database successfully");
 
-            if (!imageFile) {
-                alert("Please select an image file.");
-                return;
-            }
-
-            try {
-                const imageRef = storageRef(storage, `images/${userId}/${imageFile.name}`);
-                console.log("Uploading image to:", `images/${userId}/${imageFile.name}`);
-                await uploadBytes(imageRef, imageFile);
-                const imageUrl = await getDownloadURL(imageRef);
-                console.log("Image URL:", imageUrl);
-
-                const itemRef = ref(db, `onlineAuction/users/${userId}/auction-items`);
-                const newItemRef = push(itemRef);
-                console.log("Saving item to:", `onlineAuction/users/${userId}/auction-items`);
-                await set(newItemRef, {
-                    name: itemName,
-                    description: description,
-                    price: price,
-                    highestBid: price,
-                    highestBidder: null,
-                    endTime: endTime,
-                    imageUrl: imageUrl,
-                    viewCount: 0
-                });
-
-                alert("Item uploaded successfully!");
-                document.getElementById("uploadForm").reset();
-            } catch (error) {
-                console.error("Error during upload:", error.message);
-                alert("Error during upload: " + error.message);
-            }
-        }
-
+        alert("Item uploaded successfully!");
+        document.getElementById("uploadForm").reset();
+    } catch (error) {
+        console.error("Detailed error during upload:", error.code, error.message);
+        alert("Error during upload: " + error.message + " (Code: " + error.code + ")");
+    }
+}
+        
         // Load all auction items from all users
         function loadAllItems() {
             const usersRef = ref(db, 'onlineAuction/users');

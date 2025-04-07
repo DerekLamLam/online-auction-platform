@@ -45,7 +45,7 @@
                 }
 
                 // Check if the user is the admin
-                if (user.email !== "tszhim8889@gmail.com") {
+                if (user.email.toLowerCase() !== "tszhim8889@gmail.com") {
                     alert("Access Denied! You are not authorized.");
                     window.location.href = "index.html";
                     return;
@@ -222,12 +222,16 @@
             }
 
             try {
+                console.log("Starting image upload for userId:", userId);
                 // Upload image to Firebase Storage
-                const imagePath = `images/${userId}/${Date.now()}_${imageFile.name}`; // Unique filename
+                const imagePath = `images/${userId}/${Date.now()}_${imageFile.name}`;
                 const imageRef = storageRef(storage, imagePath);
                 const uploadResult = await uploadBytes(imageRef, imageFile);
+                console.log("Image uploaded successfully, getting download URL...");
                 const imageUrl = await getDownloadURL(uploadResult.ref);
+                console.log("Image URL:", imageUrl);
 
+                console.log("Writing item data to database for userId:", userId);
                 // Save item data to Firebase Realtime Database
                 const itemRef = ref(db, `onlineAuction/users/${userId}/auction-items`);
                 const newItemRef = push(itemRef);
@@ -241,6 +245,7 @@
                     imageUrl: imageUrl,
                     viewCount: 0
                 });
+                console.log("Item data written successfully!");
 
                 alert("Item uploaded successfully!");
                 document.getElementById("uploadForm").reset();

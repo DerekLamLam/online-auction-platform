@@ -30,12 +30,8 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             // Add event listener for the logout button
-            const logoutButton = document.querySelector('.logout-button');
-            logoutButton.addEventListener('click', logout);
-
-            // Add event listener for the upload form
-            const uploadForm = document.getElementById('uploadForm');
-            uploadForm.addEventListener('submit', uploadItem);
+           const logoutButton = document.querySelector('.logout-button');
+          logoutButton.addEventListener('click', logout);
 
             onAuthStateChanged(auth, (user) => {
                 if (!user) {
@@ -199,71 +195,49 @@
                 console.error("Error populating user dropdown:", error.message);
             });
         }
-async function uploadItem(event) {
-    event.preventDefault();
 
-    const userId = document.getElementById("userSelect").value;
-    if (!userId) {
-        alert("Please select a user to assign the item to.");
-        return;
-    }
+        // Upload auction item
+        async function uploadItem(event) {
+            event.preventDefault();
 
-    const itemName = document.getElementById("itemName").value;
-    const description = document.getElementById("description").value;
-    const price = parseFloat(document.getElementById("price").value);
-    const endTime = new Date(document.getElementById("endTime").value).getTime();
-    const imageFile = document.getElementById("image").files[0];
+            const userId = document.getElementById("userSelect").value;
+            if (!userId) {
+                alert("Please select a user to assign the item to.");
+                return;
+            }
 
-    // Validate price
-    if (isNaN(price) || price <= 0) {
-        alert("Please enter a valid starting price greater than 0.");
-        return;
-    }
+            const itemName = document.getElementById("itemName").value;
+            const description = document.getElementById("description").value;
+            const price = parseFloat(document.getElementById("price").value);
+            const endTime = new Date(document.getElementById("endTime").value).getTime();
+            const imageFile = document.getElementById("image").files[0];
 
-    // Validate endTime
-    if (isNaN(endTime)) {
-        alert("Please enter a valid auction end time.");
-        return;
-    }
+            try {
+                const imageRef = storageRef(storage, `images/${userId}/${imageFile.name}`);
+                await uploadBytes(imageRef, imageFile);
+                const imageUrl = await getDownloadURL(imageRef);
 
-    // Validate imageFile
-    if (!imageFile) {
-        alert("Please select an image file.");
-        return;
-    }
+                const itemRef = ref(db, `onlineAuction/users/${userId}/auction-items`);
+                const newItemRef = push(itemRef);
+                await set(newItemRef, {
+                    name: itemName,
+                    description: description,
+                    price: price,
+                    highestBid: price,
+                    highestBidder: null,
+                    endTime: endTime,
+                    imageUrl: imageUrl,
+                    viewCount: 0
+                });
 
-    try {
-        // Step 1: Upload image to storage
-        const imageRef = storageRef(storage, `images/${userId}/${imageFile.name}`);
-        console.log("Uploading image to:", imageRef.fullPath);
-        await uploadBytes(imageRef, imageFile);
-        const imageUrl = await getDownloadURL(imageRef);
-        console.log("Image uploaded successfully, URL:", imageUrl);
+                alert("Item uploaded successfully!");
+                document.getElementById("uploadForm").reset();
+            } catch (error) {
+                console.error("Error during upload:", error.message);
+                alert("Error during upload: " + error.message);
+            }
+        }
 
-        // Step 2: Write to database
-        const itemRef = ref(db, `onlineAuction/users/${userId}/auction-items`);
-        const newItemRef = push(itemRef);
-        console.log("Writing item to:", newItemRef.path.toString());
-        await set(newItemRef, {
-            name: itemName,
-            description: description,
-            price: price,
-            highestBid: price,
-            highestBidder: null,
-            endTime: endTime,
-            imageUrl: imageUrl,
-            viewCount: 0
-        });
-        console.log("Item written to database successfully");
-
-        alert("Item uploaded successfully!");
-        document.getElementById("uploadForm").reset();
-    } catch (error) {
-        console.error("Detailed error during upload:", error.code, error.message);
-        alert("Error during upload: " + error.message + " (Code: " + error.code + ")");
-    }
-}
-        
         // Load all auction items from all users
         function loadAllItems() {
             const usersRef = ref(db, 'onlineAuction/users');
@@ -390,16 +364,7 @@ async function uploadItem(event) {
             }
         }
 
-        // Logout function
-        function logout() {
-            signOut(auth).then(() => {
-                localStorage.removeItem('loggedInUser');
-                window.location.href = 'index.html';
-            }).catch((error) => {
-                console.error("Error logging out:", error.message);
-                alert("Error logging out: " + error.message);
-            });
-        }
+
     </script>
     <style>
         body {
@@ -485,7 +450,7 @@ async function uploadItem(event) {
 </head>
 <body>
     <h1>Admin Dashboard</h1>
-    <button class="logout-button">Logout</button>
+  <button class="logout-button">Logout</button>
 
     <!-- Manage Users Section -->
     <div class="container">
@@ -497,11 +462,9 @@ async function uploadItem(event) {
     <div class="container">
         <h2>Upload Auction Item</h2>
         <div class="form-container">
-            <form id="uploadForm">
+            <form id="uploadForm" onsubmit="uploadItem(event)">
                 <label for="userSelect">Assign to User:</label>
-                <select id="userSelect" required>
-                    <option value="">Select a user</option>
-                </select>
+                <select id="userSelect" required></select>
 
                 <label for="itemName">Item Name:</label>
                 <input type="text" id="itemName" required>
@@ -528,6 +491,5 @@ async function uploadItem(event) {
         <h2>Manage Auction Items</h2>
         <div id="itemList"></div>
     </div>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92b27ae0f9cf78d2',t:'MTc0Mzc4NzI2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>

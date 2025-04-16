@@ -1,4 +1,4 @@
-// Your web app's Firebase configuration
+// Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
     authDomain: "onlineauction-ba60b.firebaseapp.com",
@@ -249,9 +249,9 @@ function displayAuctionItems(items) {
 
 // Search function to filter auction items based on input
 function searchAuctionItems() {
-    const query = document.getElementById('searchInput').value.trim().toLowerCase(); // Get the search query and ensure it's trimmed and lowercased
+    const query = document.getElementById('searchInput').value.trim().toLowerCase(); // Get the search query 
 
-    // Fetch all auction items from the correct Firebase path and filter them based on the search query
+    // Fetch all auction items 
     const usersRef = firebase.database().ref('onlineAuction/users');
     usersRef.once('value', snapshot => {
         const filteredItems = [];
@@ -264,9 +264,9 @@ function searchAuctionItems() {
             if (userItems) {
                 // Loop through each item under this user
                 Object.entries(userItems).forEach(([itemID, item]) => {
-                    // Check if the item name or description contains the search query (case-insensitive)
+                    // Check if the item name or description contains the search query 
                     if (item.name.toLowerCase().includes(query) || item.description.toLowerCase().includes(query)) {
-                        // Add userUID and itemID to the item object for reference (useful for bidding later)
+                        // Add userUID and itemID to the item object for reference 
                         filteredItems.push({
                             ...item,
                             userUID,

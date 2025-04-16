@@ -10,10 +10,10 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
 
-  <!-- Link to external JS file (form.js) -->
+
   <script src="form.js" defer></script>
 
-  <!-- Link to Google Fonts for a clean, modern font (same as demo.html) -->
+ 
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
@@ -21,10 +21,10 @@
       font-family: 'Roboto', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f4f7fc; /* Same background color as demo.html */
+      background-color: #f4f7fc;
     }
 
-    /* Header and Navigation (same as demo.html) */
+ 
     .navbar {
       background-color: #1e2a3b;
       color: #fff;
@@ -46,7 +46,7 @@
       background-color: #45a049;
     }
 
-    /* Logout button (same as demo.html) */
+    
     .logout-container {
       position: fixed;
       top: 15px;
@@ -66,13 +66,13 @@
       background-color: #c9302c;
     }
 
-    /* Chatbot Container */
+   
     .chatbot-container {
       max-width: 600px;
       margin: 30px auto;
       background-color: #fff;
       border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Same shadow as demo.html */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
       padding: 20px;
     }
 
@@ -83,7 +83,7 @@
       margin-bottom: 20px;
     }
 
-    /* Chat Box */
+  
     #chat-box {
       height: 400px;
       border: 1px solid #e0e0e0;
@@ -94,7 +94,7 @@
       margin-bottom: 20px;
     }
 
-    /* Message Styling */
+  
     .message {
       margin: 10px 0;
       display: flex;
@@ -110,7 +110,7 @@
     }
 
     .user-msg {
-      background-color: #4CAF50; /* Same green as buttons in demo.html */
+      background-color: #4CAF50; 
       color: white;
       margin-left: auto;
       border-bottom-right-radius: 5px;
@@ -123,7 +123,7 @@
       border-bottom-left-radius: 5px;
     }
 
-    /* Input Area */
+   
     .input-container {
       display: flex;
       gap: 10px;
@@ -144,7 +144,7 @@
     }
 
     button {
-      background-color: #4CAF50; /* Same green as demo.html buttons */
+      background-color: #4CAF50; 
       color: white;
       padding: 10px 20px;
       border: none;
@@ -157,7 +157,7 @@
       background-color: #45a049;
     }
 
-    /* Responsive Design */
+ 
     @media (max-width: 600px) {
       .chatbot-container {
         margin: 20px 10px;
@@ -175,18 +175,18 @@
   </style>
 </head>
 <body>
-  <!-- Navigation Bar (same as demo.html) -->
+  
   <div class="navbar">
     <button onclick="window.location.href='upload.html'">UserPage</button>
     <button onclick="window.location.href='home.html'">HomePage</button>
   </div>
 
-  <!-- Logout Button (same as demo.html) -->
+
   <div class="logout-container">
     <button onclick="logout()">Logout</button>
   </div>
 
-  <!-- Chatbot Section -->
+  
   <div class="chatbot-container">
     <h1>Online Auction Chatbot</h1>
     <div id="chat-box"></div>
@@ -197,7 +197,7 @@
   </div>
 
   <script>
-    // Function to send user messages
+  
     function sendMessage() {
       const userInput = document.getElementById("user-input").value.trim();
       if (!userInput) return;

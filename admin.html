@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <!-- Use Firebase 10.13.2 modular syntax -->
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
         import { getDatabase, ref, onValue, remove, update, push, set } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
         import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js";
 
-        // Firebase configuration
+        // Firebase config
         const firebaseConfig = {
             apiKey: "AIzaSyB0j5JKcEoY__TKGD4cWnwdW0gkfZRB3ew",
             authDomain: "onlineauction-ba60b.firebaseapp.com",
@@ -245,7 +245,7 @@
             const usersRef = ref(db, 'onlineAuction/users');
             onValue(usersRef, (snapshot) => {
                 const itemList = document.getElementById('itemList');
-                itemList.innerHTML = ''; // Clear the list before re-rendering
+                itemList.innerHTML = ''; // Clear the list before rendering
                 if (!snapshot.exists()) {
                     console.log("No users or items found in the database.");
                     itemList.innerHTML = "<p>No items found.</p>";
@@ -257,7 +257,7 @@
                     const user = userSnapshot.val();
                     const itemsRef = ref(db, `onlineAuction/users/${userId}/auction-items`);
                     onValue(itemsRef, (itemSnapshot) => {
-                        // Clear existing items for this user to avoid duplicates
+                        // Clear existing items
                         const userItems = itemList.querySelectorAll(`[data-userid="${userId}"]`);
                         userItems.forEach(item => item.remove());
 
@@ -271,7 +271,7 @@
 
                             const itemDiv = document.createElement('div');
                             itemDiv.classList.add('item');
-                            itemDiv.setAttribute('data-userid', userId); // Mark with userId for easy removal
+                            itemDiv.setAttribute('data-userid', userId); 
                             itemDiv.innerHTML = `
                                 <h3>${item.name}</h3>
                                 <p>Owner: ${user.username} (${user.email})</p>
@@ -305,9 +305,8 @@
                             itemList.appendChild(itemDiv);
                         });
 
-                        // Remove existing event listeners and re-add them
+                       
                         document.querySelectorAll('.save-item-button').forEach(button => {
-                            // Clone the button to remove all existing event listeners
                             const newButton = button.cloneNode(true);
                             button.parentNode.replaceChild(newButton, button);
                             newButton.addEventListener('click', () => {
@@ -470,13 +469,13 @@
     <h1>Admin Dashboard</h1>
     <button class="logout-button">Logout</button>
 
-    <!-- Manage Users Section -->
+
     <div class="container">
         <h2>Manage Users</h2>
         <div id="usersList"></div>
     </div>
 
-    <!-- Upload Auction Item Section -->
+
     <div class="container">
         <h2>Upload Auction Item</h2>
         <div class="form-container">
@@ -504,7 +503,7 @@
         </div>
     </div>
 
-    <!-- Manage Auction Items Section -->
+
     <div class="container">
         <h2>Manage Auction Items</h2>
         <div id="itemList"></div>
